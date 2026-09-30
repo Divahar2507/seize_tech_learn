@@ -16,7 +16,13 @@ import {
   Check, 
   Award,
   Layers,
-  ArrowRight
+  ArrowRight,
+  Trash2,
+  Send,
+  ChevronDown,
+  ChevronUp,
+  AlertTriangle,
+  Info
 } from 'lucide-react';
 import { useLearning } from '../context/LearningContext';
 
@@ -48,6 +54,7 @@ const WEB_TEMPLATES = [
   display: grid;
   place-items: center;
   min-height: 100vh;
+  margin: 0;
 }
 .card-container {
   display: flex;
@@ -88,9 +95,13 @@ p { font-size: 12px; color: #94a3b8; }
   cursor: pointer;
 }
 .btn:hover { background: #7c3aed; }`,
-    js: `document.querySelectorAll('.btn').forEach((button, index) => {
+    js: `console.log('🚀 Responsive Flexbox Cards initialized successfully!');
+console.log('📦 Rendered ' + document.querySelectorAll('.card').length + ' interactive cards.');
+
+document.querySelectorAll('.btn').forEach((button, index) => {
   button.addEventListener('click', () => {
-    alert(\`Card \${index + 1} clicked! Interactive JavaScript is working!\`);
+    const title = button.parentElement.querySelector('h3').textContent;
+    console.info(\`[Card Event] Card \${index + 1} ("\${title}") clicked!\`);
   });
 });`
   },
@@ -113,6 +124,7 @@ p { font-size: 12px; color: #94a3b8; }
   display: grid;
   place-items: center;
   min-height: 100vh;
+  margin: 0;
 }
 .counter-box {
   background: #121829;
@@ -137,9 +149,99 @@ p { font-size: 12px; color: #94a3b8; }
 #inc-btn { background: #8b5cf6; border-color: #8b5cf6; }`,
     js: `let count = 0;
 const display = document.getElementById('count-display');
-document.getElementById('inc-btn').onclick = () => { count++; display.textContent = count; };
-document.getElementById('dec-btn').onclick = () => { count--; display.textContent = count; };
-document.getElementById('reset-btn').onclick = () => { count = 0; display.textContent = count; };`
+console.log('⚡ Interactive Counter app ready! Current count:', count);
+
+document.getElementById('inc-btn').onclick = () => { 
+  count++; 
+  display.textContent = count; 
+  console.log('[Counter] Incremented to:', count);
+};
+document.getElementById('dec-btn').onclick = () => { 
+  count--; 
+  display.textContent = count; 
+  console.log('[Counter] Decremented to:', count);
+};
+document.getElementById('reset-btn').onclick = () => { 
+  count = 0; 
+  display.textContent = count; 
+  console.warn('[Counter] Counter reset back to 0');
+};`
+  },
+  {
+    id: 'api-fetcher',
+    name: 'Async API & Live Data Simulator',
+    html: `<div class="api-card">
+  <h2>Async Tech Radar</h2>
+  <p id="status-text">Ready to query live endpoints...</p>
+  <button id="fetch-btn" class="btn">Fetch Radar Metrics</button>
+  <div id="output-box" class="json-box">No data requested yet</div>
+</div>`,
+    css: `body {
+  font-family: system-ui, sans-serif;
+  background: #090e1a;
+  color: #f1f5f9;
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  margin: 0;
+  padding: 16px;
+}
+.api-card {
+  background: #111827;
+  border: 1px solid #1f2937;
+  border-radius: 16px;
+  padding: 24px;
+  width: 100%;
+  max-width: 380px;
+  box-shadow: 0 10px 25px -5px rgba(0,0,0,0.5);
+}
+h2 { margin: 0 0 8px; font-size: 18px; color: #38bdf8; }
+p { font-size: 12px; color: #94a3b8; margin-bottom: 16px; }
+.btn {
+  background: linear-gradient(135deg, #06b6d4, #3b82f6);
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 12px;
+  cursor: pointer;
+  width: 100%;
+}
+.json-box {
+  margin-top: 14px;
+  background: #030712;
+  border: 1px solid #374151;
+  border-radius: 8px;
+  padding: 12px;
+  font-family: monospace;
+  font-size: 11px;
+  color: #a7f3d0;
+  white-space: pre-wrap;
+  word-break: break-all;
+}`,
+    js: `console.log('🌐 Async Data Simulator initialized.');
+const btn = document.getElementById('fetch-btn');
+const status = document.getElementById('status-text');
+const output = document.getElementById('output-box');
+
+btn.onclick = () => {
+  status.textContent = 'Simulating network request to /api/metrics...';
+  console.info('[Network] GET https://api.seizelearn.tech/v1/metrics (pending)');
+  
+  setTimeout(() => {
+    const payload = {
+      statusCode: 200,
+      activeLearners: 1248,
+      trendingSkill: 'Agentic AI Workflows',
+      uptime: '99.98%',
+      timestamp: new Date().toLocaleTimeString()
+    };
+    status.textContent = 'Request completed successfully (200 OK)';
+    output.textContent = JSON.stringify(payload, null, 2);
+    console.log('[Response 200 OK]:', payload);
+  }, 450);
+};`
   }
 ];
 
@@ -155,43 +257,140 @@ export const PracticeStudio: React.FC = () => {
   const [activeCodeTab, setActiveCodeTab] = useState<'html' | 'css' | 'js'>('html');
   const [iframeSrc, setIframeSrc] = useState('');
 
-  // 2. AI Prompt State
-  const [promptText, setPromptText] = useState(
-    `You are an expert React mentor. [Context]\nExplain React 19 optimistic updates to a junior developer in 3 short paragraphs. [Task]\nDo not use complex jargon, and use a restaurant ordering analogy. [Constraints]\nProvide output as clean Markdown with a 1-sentence takeaway. [Output]`
-  );
-  const [promptScore, setPromptScore] = useState<number | null>(null);
-  const [promptFeedback, setPromptFeedback] = useState<string[]>([]);
-  const [simulatedOutput, setSimulatedOutput] = useState<string>('');
-  const [isSimulating, setIsSimulating] = useState(false);
+  // Live In-Browser Console & REPL State
+  interface ConsoleLogItem {
+    id: string;
+    level: 'log' | 'info' | 'warn' | 'error';
+    message: string;
+    timestamp: string;
+  }
+  const [consoleLogs, setConsoleLogs] = useState<ConsoleLogItem[]>([]);
+  const [consoleFilter, setConsoleFilter] = useState<'all' | 'log' | 'warn' | 'error'>('all');
+  const [consoleInput, setConsoleInput] = useState('');
+  const [isConsoleOpen, setIsConsoleOpen] = useState(true);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const consoleBottomRef = useRef<HTMLDivElement>(null);
 
-  // 3. Speech Studio State
-  const [speechText, setSpeechText] = useState(
-    `Currently, I am completing my practical web development certification at SeizeLearn. Over the last three months, I designed responsive interfaces and automated workflows with React and modern APIs. I am excited to apply my skills to build high-scale products.`
-  );
-  const [isRecording, setIsRecording] = useState(false);
-  const [transcript, setTranscript] = useState('');
-  const [fillerCount, setFillerCount] = useState<Record<string, number>>({});
-  const recognitionRef = useRef<any>(null);
+  // Listen for console logs transmitted from the iframe sandbox
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data && event.data.source === 'seize-live-console') {
+        const item: ConsoleLogItem = {
+          id: `log-${Date.now()}-${Math.random()}`,
+          level: event.data.level,
+          message: event.data.message,
+          timestamp: event.data.timestamp || new Date().toLocaleTimeString()
+        };
+        setConsoleLogs(prev => [...prev.slice(-99), item]);
+      }
+    };
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, []);
 
-  // 4. Resume Scorer State
-  const [bulletText, setBulletText] = useState(
-    `Increased seminar hall booking efficiency by 85% by engineering a full-stack reservation portal using React, Firebase, and conflict-detection algorithms.`
-  );
-  const [resumeScore, setResumeScore] = useState<number | null>(null);
-  const [resumeBreakdown, setResumeBreakdown] = useState<{
-    hasActionVerb: boolean;
-    hasMetric: boolean;
-    hasAccomplishment: boolean;
-    hasToolOrTech: boolean;
-  }>({ hasActionVerb: true, hasMetric: true, hasAccomplishment: true, hasToolOrTech: true });
+  // Auto-scroll console when new logs arrive
+  useEffect(() => {
+    if (consoleBottomRef.current) {
+      consoleBottomRef.current.scrollTop = consoleBottomRef.current.scrollHeight;
+    }
+  }, [consoleLogs]);
 
-  // Update Live Web Preview
+  // Execute interactive REPL expressions inside sandbox
+  const handleRunRepl = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!consoleInput.trim()) return;
+    const cmd = consoleInput.trim();
+    setConsoleInput('');
+
+    setConsoleLogs(prev => [
+      ...prev,
+      {
+        id: `repl-in-${Date.now()}`,
+        level: 'info',
+        message: `> ${cmd}`,
+        timestamp: new Date().toLocaleTimeString()
+      }
+    ]);
+
+    try {
+      if (iframeRef.current && iframeRef.current.contentWindow) {
+        const res = (iframeRef.current.contentWindow as any).eval(cmd);
+        if (res !== undefined) {
+          setConsoleLogs(prev => [
+            ...prev,
+            {
+              id: `repl-out-${Date.now()}`,
+              level: 'log',
+              message: `< ${typeof res === 'object' ? JSON.stringify(res, null, 2) : String(res)}`,
+              timestamp: new Date().toLocaleTimeString()
+            }
+          ]);
+        }
+      }
+    } catch (err: any) {
+      setConsoleLogs(prev => [
+        ...prev,
+        {
+          id: `repl-err-${Date.now()}`,
+          level: 'error',
+          message: `< Uncaught ${err?.message || String(err)}`,
+          timestamp: new Date().toLocaleTimeString()
+        }
+      ]);
+    }
+  };
+
+  // Update Live Web Preview with console interceptor
   useEffect(() => {
     const combined = `
       <!DOCTYPE html>
       <html>
         <head>
-          <style>${cssCode}</style>
+          <meta charset="utf-8">
+          <style>
+            ${cssCode}
+          </style>
+          <script>
+            (function() {
+              function serialize(arg) {
+                if (arg === null) return 'null';
+                if (arg === undefined) return 'undefined';
+                if (typeof arg === 'function') return '[Function: ' + (arg.name || 'anonymous') + ']';
+                if (arg instanceof Error) return arg.toString() + (arg.stack ? '\\n' + arg.stack : '');
+                if (typeof arg === 'object') {
+                  try { return JSON.stringify(arg, null, 2); } catch (e) { return String(arg); }
+                }
+                return String(arg);
+              }
+
+              function sendLog(level, args) {
+                try {
+                  const text = Array.from(args).map(serialize).join(' ');
+                  window.parent.postMessage({
+                    source: 'seize-live-console',
+                    level: level,
+                    message: text,
+                    timestamp: new Date().toLocaleTimeString()
+                  }, '*');
+                } catch (err) {}
+              }
+
+              const _log = console.log;
+              const _info = console.info;
+              const _warn = console.warn;
+              const _error = console.error;
+
+              console.log = function(...args) { _log.apply(console, args); sendLog('log', args); };
+              console.info = function(...args) { _info.apply(console, args); sendLog('info', args); };
+              console.warn = function(...args) { _warn.apply(console, args); sendLog('warn', args); };
+              console.error = function(...args) { _error.apply(console, args); sendLog('error', args); };
+
+              window.onerror = function(message, source, lineno, colno, error) {
+                sendLog('error', [message + (lineno ? ' (line ' + lineno + ')' : '')]);
+                return false;
+              };
+            })();
+          </script>
         </head>
         <body>
           ${htmlCode}
@@ -462,24 +661,177 @@ export const PracticeStudio: React.FC = () => {
               </div>
             </div>
 
-            {/* Live Sandbox Preview */}
-            <div className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-950 flex flex-col shadow-xl">
-              <div className="border-b border-slate-800 bg-slate-900 px-4 py-2.5 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="h-2.5 w-2.5 rounded-full bg-rose-500" />
-                  <span className="h-2.5 w-2.5 rounded-full bg-amber-500" />
-                  <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
-                  <span className="text-xs font-mono text-slate-400 ml-2">Live Web Sandbox</span>
+            {/* Live Sandbox Preview & Interactive Console Panel */}
+            <div className="space-y-4">
+              {/* Sandbox Preview Window */}
+              <div className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-950 flex flex-col shadow-xl">
+                <div className="border-b border-slate-800 bg-slate-900 px-4 py-2.5 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="h-2.5 w-2.5 rounded-full bg-rose-500" />
+                    <span className="h-2.5 w-2.5 rounded-full bg-amber-500" />
+                    <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
+                    <span className="text-xs font-mono text-slate-400 ml-2">Live Web Sandbox</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] text-emerald-400 font-bold flex items-center gap-1">
+                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                      Live Sync
+                    </span>
+                  </div>
                 </div>
-                <span className="text-[10px] text-emerald-400 font-bold">100% Real-time</span>
+
+                <iframe
+                  ref={iframeRef}
+                  title="Live Sandbox"
+                  srcDoc={iframeSrc}
+                  sandbox="allow-scripts allow-modals"
+                  className="w-full h-[320px] border-none bg-white rounded-b-none"
+                />
               </div>
 
-              <iframe
-                title="Live Sandbox"
-                srcDoc={iframeSrc}
-                sandbox="allow-scripts allow-modals"
-                className="w-full h-[400px] border-none bg-white rounded-b-2xl"
-              />
+              {/* In-Browser Live JS Console & Terminal */}
+              <div className="overflow-hidden rounded-2xl border border-slate-800 bg-[#090d16] flex flex-col shadow-xl">
+                {/* Console Bar Header */}
+                <div className="border-b border-slate-800 bg-slate-900/90 px-4 py-2 flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5 text-xs font-mono font-bold text-amber-400">
+                      <Terminal className="h-4 w-4" />
+                      <span>Console & REPL</span>
+                    </div>
+
+                    {/* Filter Pills */}
+                    <div className="flex items-center gap-1 ml-2 text-[10px]">
+                      <button
+                        onClick={() => setConsoleFilter('all')}
+                        className={`rounded px-2 py-0.5 font-mono transition ${
+                          consoleFilter === 'all' ? 'bg-slate-700 text-white font-bold' : 'text-slate-400 hover:text-slate-200'
+                        }`}
+                      >
+                        All ({consoleLogs.length})
+                      </button>
+                      <button
+                        onClick={() => setConsoleFilter('log')}
+                        className={`rounded px-2 py-0.5 font-mono transition ${
+                          consoleFilter === 'log' ? 'bg-emerald-500/20 text-emerald-400 font-bold' : 'text-slate-400 hover:text-slate-200'
+                        }`}
+                      >
+                        Logs ({consoleLogs.filter(l => l.level === 'log').length})
+                      </button>
+                      <button
+                        onClick={() => setConsoleFilter('warn')}
+                        className={`rounded px-2 py-0.5 font-mono transition ${
+                          consoleFilter === 'warn' ? 'bg-amber-500/20 text-amber-400 font-bold' : 'text-slate-400 hover:text-slate-200'
+                        }`}
+                      >
+                        Warn ({consoleLogs.filter(l => l.level === 'warn').length})
+                      </button>
+                      <button
+                        onClick={() => setConsoleFilter('error')}
+                        className={`rounded px-2 py-0.5 font-mono transition ${
+                          consoleFilter === 'error' ? 'bg-rose-500/20 text-rose-400 font-bold' : 'text-slate-400 hover:text-slate-200'
+                        }`}
+                      >
+                        Errors ({consoleLogs.filter(l => l.level === 'error').length})
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      onClick={() => setConsoleLogs([])}
+                      title="Clear Console"
+                      className="p-1 rounded-md text-slate-400 hover:text-rose-400 hover:bg-slate-800 transition"
+                      aria-label="Clear Console"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                    <button
+                      onClick={() => setIsConsoleOpen(!isConsoleOpen)}
+                      className="p-1 rounded-md text-slate-400 hover:text-white hover:bg-slate-800 transition"
+                      aria-label="Toggle Console View"
+                    >
+                      {isConsoleOpen ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Console Log Area */}
+                {isConsoleOpen && (
+                  <>
+                    <div 
+                      ref={consoleBottomRef}
+                      className="h-[180px] overflow-y-auto p-3 font-mono text-xs space-y-1.5 bg-[#070a12]/95 border-b border-slate-800/80 scrollbar-thin scrollbar-thumb-slate-800"
+                    >
+                      {consoleLogs.length === 0 ? (
+                        <div className="text-[11px] text-slate-500 italic py-6 text-center">
+                          Console ready. Use <span className="text-cyan-400">console.log(...)</span> or interact with preview elements to see live output.
+                        </div>
+                      ) : (
+                        consoleLogs
+                          .filter(log => consoleFilter === 'all' || log.level === consoleFilter)
+                          .map(log => {
+                            const isError = log.level === 'error';
+                            const isWarn = log.level === 'warn';
+                            const isInfo = log.level === 'info';
+
+                            return (
+                              <div
+                                key={log.id}
+                                className={`flex items-start gap-2 py-0.5 px-1.5 rounded transition ${
+                                  isError 
+                                    ? 'bg-rose-950/30 text-rose-300 border-l-2 border-rose-500' 
+                                    : isWarn 
+                                    ? 'bg-amber-950/20 text-amber-300 border-l-2 border-amber-500' 
+                                    : isInfo
+                                    ? 'text-cyan-300'
+                                    : 'text-slate-200 hover:bg-slate-900/50'
+                                }`}
+                              >
+                                <span className="text-[10px] text-slate-600 select-none shrink-0 pt-0.5">
+                                  {log.timestamp}
+                                </span>
+                                <span className="shrink-0 pt-0.5">
+                                  {isError ? (
+                                    <AlertCircle className="h-3 w-3 text-rose-400" />
+                                  ) : isWarn ? (
+                                    <AlertTriangle className="h-3 w-3 text-amber-400" />
+                                  ) : isInfo ? (
+                                    <Info className="h-3 w-3 text-cyan-400" />
+                                  ) : (
+                                    <span className="text-emerald-400 text-[10px] font-bold">&gt;</span>
+                                  )}
+                                </span>
+                                <pre className="font-mono text-xs whitespace-pre-wrap break-all flex-1">
+                                  {log.message}
+                                </pre>
+                              </div>
+                            );
+                          })
+                      )}
+                    </div>
+
+                    {/* Interactive REPL Prompt Bar */}
+                    <form onSubmit={handleRunRepl} className="flex items-center gap-2 bg-slate-950 px-3 py-2">
+                      <span className="font-mono text-xs font-bold text-cyan-400 select-none">&gt;</span>
+                      <input
+                        type="text"
+                        value={consoleInput}
+                        onChange={e => setConsoleInput(e.target.value)}
+                        placeholder="Type JS expression (e.g. 2 + 2, document.title) & press Enter..."
+                        className="flex-1 bg-transparent text-xs font-mono text-white placeholder-slate-600 outline-none"
+                      />
+                      <button
+                        type="submit"
+                        disabled={!consoleInput.trim()}
+                        className="rounded-lg bg-cyan-600/30 text-cyan-300 hover:bg-cyan-600/50 px-2.5 py-1 text-[11px] font-bold transition disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-1"
+                      >
+                        <Send className="h-3 w-3" />
+                        <span>Eval</span>
+                      </button>
+                    </form>
+                  </>
+                )}
+              </div>
             </div>
           </div>
         </div>
