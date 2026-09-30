@@ -1,0 +1,16 @@
+{
+  "name": "SeizeLearn — Practical Skills to Career",
+  "short_name": "SeizeLearn",
+  "description": "Practical skills-to-career learning platform in English & Tamil with real-world practice sandboxes.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#020617",
+  "theme_color": "#7c3aed",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    }
+  ]
+}
