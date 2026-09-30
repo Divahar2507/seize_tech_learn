@@ -271,6 +271,36 @@ export const PracticeStudio: React.FC = () => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const consoleBottomRef = useRef<HTMLDivElement>(null);
 
+  // 2. AI Prompt State
+  const [promptText, setPromptText] = useState(
+    `You are an expert React mentor. [Context]\nExplain React 19 optimistic updates to a junior developer in 3 short paragraphs. [Task]\nDo not use complex jargon, and use a restaurant ordering analogy. [Constraints]\nProvide output as clean Markdown with a 1-sentence takeaway. [Output]`
+  );
+  const [promptScore, setPromptScore] = useState<number | null>(null);
+  const [promptFeedback, setPromptFeedback] = useState<string[]>([]);
+  const [simulatedOutput, setSimulatedOutput] = useState<string>('');
+  const [isSimulating, setIsSimulating] = useState(false);
+
+  // 3. Speech Studio State
+  const [speechText, setSpeechText] = useState(
+    `Currently, I am completing my practical web development certification at SeizeLearn. Over the last three months, I designed responsive interfaces and automated workflows with React and modern APIs. I am excited to apply my skills to build high-scale products.`
+  );
+  const [isRecording, setIsRecording] = useState(false);
+  const [transcript, setTranscript] = useState('');
+  const [fillerCount, setFillerCount] = useState<Record<string, number>>({});
+  const recognitionRef = useRef<any>(null);
+
+  // 4. Resume Scorer State
+  const [bulletText, setBulletText] = useState(
+    `Increased seminar hall booking efficiency by 85% by engineering a full-stack reservation portal using React, Firebase, and conflict-detection algorithms.`
+  );
+  const [resumeScore, setResumeScore] = useState<number | null>(null);
+  const [resumeBreakdown, setResumeBreakdown] = useState<{
+    hasActionVerb: boolean;
+    hasMetric: boolean;
+    hasAccomplishment: boolean;
+    hasToolOrTech: boolean;
+  }>({ hasActionVerb: true, hasMetric: true, hasAccomplishment: true, hasToolOrTech: true });
+
   // Listen for console logs transmitted from the iframe sandbox
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
