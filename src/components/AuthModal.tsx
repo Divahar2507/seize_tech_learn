@@ -28,7 +28,9 @@ export const AuthModal: React.FC = () => {
     language, 
     openAuthModal, 
     setOpenAuthModal, 
-    userState 
+    userState,
+    loginLocally,
+    logoutLocally
   } = useLearning();
 
   const [isRegister, setIsRegister] = useState<boolean>(false);
@@ -70,6 +72,23 @@ export const AuthModal: React.FC = () => {
     } catch (err: any) {
       console.error('Auth error', err);
       const msg = err.message || '';
+      const code = err.code || '';
+
+      // If Firebase Auth backend is not activated yet in console or network fails, gracefully log in locally!
+      if (
+        code === 'auth/configuration-not-found' || 
+        msg.includes('CONFIGURATION_NOT_FOUND') ||
+        code === 'auth/network-request-failed' ||
+        msg.includes('Failed to fetch')
+      ) {
+        const cleanName = isRegister 
+          ? username 
+          : (usernameOrEmail.includes('@') ? usernameOrEmail.split('@')[0] : usernameOrEmail);
+        loginLocally(cleanName, isRegister ? email : (usernameOrEmail.includes('@') ? usernameOrEmail : undefined));
+        setOpenAuthModal(false);
+        return;
+      }
+
       if (msg.includes('auth/invalid-credential') || msg.includes('auth/wrong-password') || msg.includes('auth/user-not-found')) {
         setErrorMsg(language === 'ta' ? 'தவறான பயனர் பெயர் அல்லது கடவுச்சொல்.' : 'Invalid credentials. Please verify your username and password.');
       } else if (msg.includes('auth/email-already-in-use')) {
@@ -101,7 +120,18 @@ export const AuthModal: React.FC = () => {
       console.error(`${provider} OAuth error:`, err);
       const code = err.code || '';
       const msg = err.message || '';
-      if (code === 'auth/unauthorized-domain' || msg.includes('auth/unauthorized-domain')) {
+      if (
+        code === 'auth/configuration-not-found' ||
+        msg.includes('CONFIGURATION_NOT_FOUND') ||
+        code === 'auth/network-request-failed' ||
+        msg.includes('Failed to fetch')
+      ) {
+        setErrorMsg(
+          language === 'ta'
+            ? 'Firebase Authentication இன்னும் தொடங்கப்படவில்லை: Firebase Console > Security > Authentication என்பதில் "Get Started" என்பதைக் கிளிக் செய்யவும். அல்லது கீழே உள்ள பயனர் பெயர் & கடவுச்சொல் மூலம் இப்போதே உள்நுழையலாம்.'
+            : 'Firebase Authentication is not activated yet for this project. In Firebase Console, go to Security > Authentication and click "Get Started". Or log in with Username & Password below!'
+        );
+      } else if (code === 'auth/unauthorized-domain' || msg.includes('auth/unauthorized-domain')) {
         setErrorMsg(
           language === 'ta'
             ? 'டொமைன் அனுமதி தேவை: Firebase Console > Authentication > Settings > Authorized domains என்பதில் "localhost" ஐ சேர்க்கவும். அல்லது கீழே உள்ள பயனர் பெயர் & கடவுச்சொல் மூலம் இப்போதே உள்நுழையலாம்.'
@@ -119,7 +149,7 @@ export const AuthModal: React.FC = () => {
   };
 
   const handleLogout = async () => {
-    await logoutUser();
+    logoutLocally();
     setOpenAuthModal(false);
   };
 

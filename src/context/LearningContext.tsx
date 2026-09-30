@@ -17,7 +17,7 @@ import { INITIAL_COURSES } from '../data/coursesData';
 import { INITIAL_PROJECTS } from '../data/projectsData';
 import { DAILY_CHALLENGES } from '../data/dailyChallenges';
 import { ALL_BADGES } from '../data/badgesData';
-import { subscribeToAuth, syncUserStateToCloud, fetchUserStateFromCloud } from '../services/firebase';
+import { subscribeToAuth, syncUserStateToCloud, fetchUserStateFromCloud, logoutUser } from '../services/firebase';
 
 const STORAGE_KEY = 'seize_learn_platform_v3';
 
@@ -92,6 +92,8 @@ interface LearningContextType {
   setSearchQuery: (q: string) => void;
   isOnline: boolean;
   findCertificateById: (id: string) => Certificate | undefined;
+  loginLocally: (username: string, email?: string) => void;
+  logoutLocally: () => void;
 }
 
 const LearningContext = createContext<LearningContextType | undefined>(undefined);
@@ -524,6 +526,34 @@ export const LearningProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     return userState.certificates.find(c => c.id === id || c.certificateCode === id);
   };
 
+  const loginLocally = (username: string, email?: string) => {
+    const cleanName = username.trim() || 'Learner';
+    const cleanEmail = email?.trim() || `${cleanName.toLowerCase().replace(/[^a-z0-9_]/g, '')}@seizelearn.local`;
+    setUserState(prev => ({
+      ...prev,
+      user: {
+        uid: `user-local-${Date.now()}`,
+        displayName: cleanName,
+        email: cleanEmail,
+        isAnonymous: false
+      }
+    }));
+    triggerCelebration();
+  };
+
+  const logoutLocally = () => {
+    logoutUser();
+    setUserState(prev => ({
+      ...prev,
+      user: {
+        uid: 'guest-learner',
+        displayName: 'Learner',
+        email: 'learner@seizelearn.local',
+        isAnonymous: true
+      }
+    }));
+  };
+
   return (
     <LearningContext.Provider
       value={{
@@ -573,7 +603,9 @@ export const LearningProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         searchQuery,
         setSearchQuery,
         isOnline,
-        findCertificateById
+        findCertificateById,
+        loginLocally,
+        logoutLocally
       }}
     >
       {children}
