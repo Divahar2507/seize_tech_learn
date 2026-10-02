@@ -25,7 +25,6 @@ import {
 
 export const AuthModal: React.FC = () => {
   const { 
-    language, 
     openAuthModal, 
     setOpenAuthModal, 
     userState,
@@ -56,15 +55,15 @@ export const AuthModal: React.FC = () => {
     try {
       if (isRegister) {
         if (!username.trim()) {
-          throw new Error(language === 'ta' ? 'தயவுசெய்து உங்கள் பயனர் பெயரை உள்ளிடவும்.' : 'Please enter a username.');
+          throw new Error('Please enter a username.');
         }
         if (password.length < 6) {
-          throw new Error(language === 'ta' ? 'கடவுச்சொல் குறைந்தது 6 எழுத்துகள் இருக்க வேண்டும்.' : 'Password must be at least 6 characters long.');
+          throw new Error('Password must be at least 6 characters long.');
         }
         await registerWithCredentials(username, email, password);
       } else {
         if (!usernameOrEmail.trim()) {
-          throw new Error(language === 'ta' ? 'பயனர் பெயர் அல்லது மின்னஞ்சலை உள்ளிடவும்.' : 'Please enter your username or email.');
+          throw new Error('Please enter your username or email.');
         }
         await loginWithCredentials(usernameOrEmail, password);
       }
@@ -90,9 +89,9 @@ export const AuthModal: React.FC = () => {
       }
 
       if (msg.includes('auth/invalid-credential') || msg.includes('auth/wrong-password') || msg.includes('auth/user-not-found')) {
-        setErrorMsg(language === 'ta' ? 'தவறான பயனர் பெயர் அல்லது கடவுச்சொல்.' : 'Invalid credentials. Please verify your username and password.');
+        setErrorMsg('Invalid credentials. Please verify your username and password.');
       } else if (msg.includes('auth/email-already-in-use')) {
-        setErrorMsg(language === 'ta' ? 'இந்த மின்னஞ்சல்/பயனர் பெயர் ஏற்கனவே பயன்பாட்டில் உள்ளது.' : 'This email or username is already registered. Try signing in.');
+        setErrorMsg('This email or username is already registered. Try signing in.');
       } else {
         setErrorMsg(err.message || 'Authentication error. Please check your inputs.');
       }
@@ -127,18 +126,14 @@ export const AuthModal: React.FC = () => {
         msg.includes('Failed to fetch')
       ) {
         setErrorMsg(
-          language === 'ta'
-            ? 'Firebase Authentication இன்னும் தொடங்கப்படவில்லை: Firebase Console > Security > Authentication என்பதில் "Get Started" என்பதைக் கிளிக் செய்யவும். அல்லது கீழே உள்ள பயனர் பெயர் & கடவுச்சொல் மூலம் இப்போதே உள்நுழையலாம்.'
-            : 'Firebase Authentication is not activated yet for this project. In Firebase Console, go to Security > Authentication and click "Get Started". Or log in with Username & Password below!'
+          'Firebase Authentication is not activated yet for this project. In Firebase Console, go to Security > Authentication and click "Get Started". Or log in with Username & Password below!'
         );
       } else if (code === 'auth/unauthorized-domain' || msg.includes('auth/unauthorized-domain')) {
         setErrorMsg(
-          language === 'ta'
-            ? 'டொமைன் அனுமதி தேவை: Firebase Console > Authentication > Settings > Authorized domains என்பதில் "localhost" ஐ சேர்க்கவும். அல்லது கீழே உள்ள பயனர் பெயர் & கடவுச்சொல் மூலம் இப்போதே உள்நுழையலாம்.'
-            : 'Domain not authorized: Please add "localhost" to your Firebase Console -> Authentication -> Settings -> Authorized Domains. Or use the Username & Password login below!'
+          'Domain not authorized: Please add "localhost" to your Firebase Console -> Authentication -> Settings -> Authorized Domains. Or use the Username & Password login below!'
         );
       } else if (code === 'auth/popup-closed-by-user') {
-        setErrorMsg(language === 'ta' ? 'உள்நுழைவு சாளரம் மூடப்பட்டது.' : 'Sign-in window was closed before completion.');
+        setErrorMsg('Sign-in window was closed before completion.');
       } else {
         setErrorMsg(err.message || `${provider} sign-in encountered an error.`);
       }
@@ -172,15 +167,13 @@ export const AuthModal: React.FC = () => {
           </div>
           <h3 className="font-heading text-xl font-bold text-white">
             {!isGuest 
-              ? (language === 'ta' ? 'உங்கள் கணக்கு' : 'Your Learner Profile')
+              ? 'Your Learner Profile'
               : isRegister 
-                ? (language === 'ta' ? 'புதிய கணக்கு தொடங்குங்கள்' : 'Create Your Free Account')
-                : (language === 'ta' ? 'மீண்டும் வருக!' : 'Welcome Back to SeizeLearn')}
+                ? 'Create Your Free Account'
+                : 'Welcome Back to SeizeLearn'}
           </h3>
           <p className="text-xs text-slate-400 max-w-xs mx-auto">
-            {language === 'ta' 
-              ? 'கற்றல் புள்ளிகள், செய்முறைப் பணிகள் மற்றும் சான்றிதழ்களைப் பாதுகாக்க உள்நுழையவும்.'
-              : 'Save your learning streaks, verified projects, and career credentials to the cloud.'}
+            Save your learning streaks, verified projects, and career credentials to the cloud.
           </p>
         </div>
 
@@ -206,7 +199,7 @@ export const AuthModal: React.FC = () => {
               onClick={handleLogout}
               className="w-full rounded-xl border border-rose-500/40 bg-rose-500/10 py-2.5 text-xs font-bold text-rose-300 hover:bg-rose-500/20 transition mt-4"
             >
-              {language === 'ta' ? 'வெளியேறு' : 'Sign Out'}
+              Sign Out
             </button>
           </div>
         ) : (
@@ -268,7 +261,7 @@ export const AuthModal: React.FC = () => {
             <div className="relative flex items-center justify-center pt-2">
               <div className="border-t border-slate-800 w-full" />
               <span className="bg-slate-900 px-3 text-[10px] font-bold uppercase tracking-wider text-slate-500 absolute">
-                {language === 'ta' ? 'அல்லது உள்நுழைவு மூலம்' : 'or continue with username'}
+                or continue with username
               </span>
             </div>
 
@@ -280,7 +273,7 @@ export const AuthModal: React.FC = () => {
                 <>
                   <div>
                     <label className="block text-[11px] font-bold uppercase text-slate-400 mb-1">
-                      {language === 'ta' ? 'பயனர் பெயர்' : 'Username'}
+                      Username
                     </label>
                     <div className="relative">
                       <User className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
@@ -298,7 +291,7 @@ export const AuthModal: React.FC = () => {
 
                   <div>
                     <label className="block text-[11px] font-bold uppercase text-slate-400 mb-1">
-                      {language === 'ta' ? 'மின்னஞ்சல் முகவரி' : 'Email Address'}
+                      Email Address
                     </label>
                     <div className="relative">
                       <Mail className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
@@ -317,7 +310,7 @@ export const AuthModal: React.FC = () => {
                 /* Login: Username or Email Field */
                 <div>
                   <label className="block text-[11px] font-bold uppercase text-slate-400 mb-1">
-                    {language === 'ta' ? 'பயனர் பெயர் அல்லது மின்னஞ்சல்' : 'Username or Email'}
+                    Username or Email
                   </label>
                   <div className="relative">
                     <User className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
@@ -337,7 +330,7 @@ export const AuthModal: React.FC = () => {
               {/* Password Field */}
               <div>
                 <label className="block text-[11px] font-bold uppercase text-slate-400 mb-1">
-                  {language === 'ta' ? 'கடவுச்சொல்' : 'Password'}
+                  Password
                 </label>
                 <div className="relative">
                   <Lock className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
@@ -368,16 +361,16 @@ export const AuthModal: React.FC = () => {
                 className="w-full rounded-xl bg-violet-600 py-3 text-xs font-bold text-white transition hover:bg-violet-500 disabled:opacity-50 mt-3 shadow-lg shadow-violet-600/25 flex items-center justify-center gap-2"
               >
                 {loading ? (
-                  <span>{language === 'ta' ? 'சரிபார்க்கிறது...' : 'Authenticating...'}</span>
+                  <span>Authenticating...</span>
                 ) : isRegister ? (
                   <>
                     <UserPlus className="h-4 w-4" />
-                    <span>{language === 'ta' ? 'புதிய கணக்கு தொடங்கு' : 'Create My Account'}</span>
+                    <span>Create My Account</span>
                   </>
                 ) : (
                   <>
                     <LogIn className="h-4 w-4" />
-                    <span>{language === 'ta' ? 'உள்நுழை' : 'Sign In with Password'}</span>
+                    <span>Sign In with Password</span>
                   </>
                 )}
               </button>
@@ -394,8 +387,8 @@ export const AuthModal: React.FC = () => {
                 className="text-xs text-cyan-400 hover:underline font-semibold"
               >
                 {isRegister
-                  ? (language === 'ta' ? 'ஏற்கனவே கணக்கு உள்ளதா? உள்நுழையவும்' : 'Already have an account? Sign In')
-                  : (language === 'ta' ? 'கணக்கு இல்லையா? புதிய கணக்கு தொடங்குங்கள்' : "Don't have an account? Sign Up free")}
+                  ? 'Already have an account? Sign In'
+                  : "Don't have an account? Sign Up free"}
               </button>
             </div>
           </>

@@ -16,7 +16,6 @@ import { useLearning } from '../context/LearningContext';
 
 export const CertificateModal: React.FC = () => {
   const { 
-    language, 
     openCertificateModal, 
     setOpenCertificateModal, 
     selectedCertificate 
@@ -165,7 +164,7 @@ export const CertificateModal: React.FC = () => {
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
               <Share2 className="h-3.5 w-3.5 text-cyan-400" />
-              <span>{language === 'ta' ? 'சான்றிதழை இணைத்து பகிருங்கள்' : 'Showcase & Sync Credential'}</span>
+              <span>Showcase & Sync Credential</span>
             </span>
             <span className="text-[11px] font-mono text-emerald-400 flex items-center gap-1">
               <CheckCircle2 className="h-3 w-3" />
@@ -184,7 +183,7 @@ export const CertificateModal: React.FC = () => {
               <svg className="h-3.5 w-3.5 fill-current" viewBox="0 0 24 24">
                 <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.46 8.76a1.45 1.45 0 0 0 0-2.9 1.45 1.45 0 0 0 0 2.9m1.4 9.74v-8.37H5.06v8.37h2.8z"/>
               </svg>
-              <span>{language === 'ta' ? 'லிங்க்ட்இனில் சான்றிதழ் சேர்க்க' : 'Add to LinkedIn Profile'}</span>
+              <span>Add to LinkedIn Profile</span>
               <ExternalLink className="h-3 w-3 opacity-80" />
             </a>
 
@@ -232,12 +231,12 @@ export const CertificateModal: React.FC = () => {
               {copied ? (
                 <>
                   <Check className="h-3.5 w-3.5 text-emerald-400" />
-                  <span className="text-emerald-400 font-bold">{language === 'ta' ? 'நகலெடுக்கப்பட்டது!' : 'Copied!'}</span>
+                  <span className="text-emerald-400 font-bold">Copied!</span>
                 </>
               ) : (
                 <>
                   <Copy className="h-3.5 w-3.5 text-slate-400" />
-                  <span>{language === 'ta' ? 'இணைப்பு நகலெடு' : 'Copy Link'}</span>
+                  <span>Copy Link</span>
                 </>
               )}
             </button>

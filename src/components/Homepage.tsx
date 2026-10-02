@@ -23,16 +23,15 @@ import {
 import { useLearning } from '../context/LearningContext';
 import { LearningCategory } from '../types/learning';
 
-const CATEGORY_CHIPS: { label: string; labelTa: string; category: LearningCategory; icon: any }[] = [
-  { label: 'AI Skills', labelTa: 'AI கருவிகள்', category: 'AI Tools & Prompting', icon: BrainCircuit },
-  { label: 'Web Development', labelTa: 'இணையதள உருவாக்கம்', category: 'Web Development', icon: Code2 },
-  { label: 'Spoken English', labelTa: 'ஆங்கில தொடர்பு', category: 'English & Communication', icon: WandSparkles },
-  { label: 'Placement Prep', labelTa: 'வேலைவாய்ப்பு தயாரிப்பு', category: 'Career & Placement Prep', icon: BriefcaseBusiness },
+const CATEGORY_CHIPS: { label: string; category: LearningCategory; icon: any }[] = [
+  { label: 'AI Skills', category: 'AI Tools & Prompting', icon: BrainCircuit },
+  { label: 'Web Development', category: 'Web Development', icon: Code2 },
+  { label: 'Spoken English', category: 'English & Communication', icon: WandSparkles },
+  { label: 'Placement Prep', category: 'Career & Placement Prep', icon: BriefcaseBusiness },
 ];
 
 export const Homepage: React.FC = () => {
   const { 
-    language, 
     t, 
     allCourses, 
     allProjects, 
@@ -65,7 +64,7 @@ export const Homepage: React.FC = () => {
       c.category.toLowerCase().includes(q) ||
       c.tags.some(tag => tag.toLowerCase().includes(q))
     );
-  }, [allCourses, searchQuery, language]);
+  }, [allCourses, searchQuery]);
 
   const level = Math.floor(userState.xp / 250) + 1;
   const xpToNextLevel = 250 - (userState.xp % 250);
@@ -102,31 +101,18 @@ export const Homepage: React.FC = () => {
         <div className="relative max-w-3xl">
           <div className="inline-flex items-center gap-2 rounded-full border border-violet-400/30 bg-violet-500/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-violet-300">
             <span className="h-2 w-2 rounded-full bg-cyan-400 animate-pulse" />
-            {language === 'ta' ? 'திறன் முதல் வேலைவாய்ப்பு வரை' : 'Practical Skills to Career'}
+            Practical Skills to Career
           </div>
 
           <h1 className="mt-4 font-heading text-3xl font-black tracking-tight text-white sm:text-5xl lg:text-6xl leading-[1.1]">
-            {language === 'ta' ? (
-              <>
-                பயனுள்ள திறன்களைக் கற்றுக் கொள்ளுங்கள்.<br />
-                <span className="bg-gradient-to-r from-violet-400 via-cyan-300 to-indigo-300 bg-clip-text text-transparent">
-                  உண்மையான படைப்புகள் மூலம் நிரூபியுங்கள்.
-                </span>
-              </>
-            ) : (
-              <>
-                Learn useful skills.<br />
-                <span className="bg-gradient-to-r from-violet-400 via-cyan-300 to-indigo-300 bg-clip-text text-transparent">
-                  Build real proof. Grow every day.
-                </span>
-              </>
-            )}
+            Learn useful skills.<br />
+            <span className="bg-gradient-to-r from-violet-400 via-cyan-300 to-indigo-300 bg-clip-text text-transparent">
+              Build real proof. Grow every day.
+            </span>
           </h1>
 
           <p className="mt-4 text-sm sm:text-base text-slate-300 max-w-2xl leading-relaxed">
-            {language === 'ta'
-              ? 'நீண்ட தியரி வகுப்புகளைத் தவிர்த்து, குறுகிய நேரப் பாடங்கள், செய்முறைப் பயிற்சிகள் மற்றும் போர்ட்ஃபோலியோ திட்டப்பணிகள் மூலம் உங்கள் எதிர்காலத்தை உருவாக்குங்கள்.'
-              : 'Beyond classroom theory: short practical lessons, daily active recall, hands-on capstone projects, and direct career readiness in Tamil and English.'}
+            Beyond classroom theory: short practical lessons, daily active recall, hands-on capstone projects, and direct career readiness.
           </p>
 
           {/* Interactive Search Bar */}
@@ -136,7 +122,7 @@ export const Homepage: React.FC = () => {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={language === 'ta' ? 'இன்று நீங்கள் என்ன கற்க விரும்புகிறீர்கள்?' : 'What do you want to learn today?'}
+              placeholder="What do you want to learn today?"
               className="h-14 w-full rounded-2xl border border-slate-700 bg-slate-900/90 pl-12 pr-28 text-sm text-white placeholder-slate-400 shadow-inner outline-none transition focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20"
             />
             <button
@@ -144,7 +130,7 @@ export const Homepage: React.FC = () => {
               className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs text-slate-300 transition"
               title="Open full command search"
             >
-              <span>{language === 'ta' ? 'தேடு' : 'Search'}</span>
+              <span>Search</span>
               <kbd className="font-mono text-[10px] bg-slate-900 px-1.5 py-0.5 rounded text-slate-400 border border-slate-800">Ctrl K</kbd>
             </button>
           </div>
@@ -152,7 +138,7 @@ export const Homepage: React.FC = () => {
           {/* Quick Filter Chips */}
           <div className="mt-5 flex flex-wrap items-center gap-2">
             <span className="text-xs font-bold uppercase tracking-wider text-slate-400 mr-1">
-              {language === 'ta' ? 'முக்கியப் பாதைகள்:' : 'Popular paths:'}
+              Popular paths:
             </span>
             {CATEGORY_CHIPS.map(chip => {
               const Icon = chip.icon;
@@ -167,7 +153,7 @@ export const Homepage: React.FC = () => {
                   }`}
                 >
                   <Icon className="h-3.5 w-3.5 text-violet-400" />
-                  <span>{language === 'ta' ? chip.labelTa : chip.label}</span>
+                  <span>{chip.label}</span>
                 </button>
               );
             })}
@@ -185,7 +171,7 @@ export const Homepage: React.FC = () => {
             <div className="flex items-start justify-between gap-4">
               <div>
                 <span className="text-xs font-bold uppercase tracking-wider text-cyan-400">
-                  {language === 'ta' ? 'கற்றலைத் தொடருங்கள்' : 'Continue Learning'}
+                  Continue Learning
                 </span>
                 <h3 className="mt-1 font-heading text-xl font-bold text-white">
                   {t(currentCourse.title)}
@@ -205,9 +191,7 @@ export const Homepage: React.FC = () => {
             <div className="mt-6">
               <div className="flex items-center justify-between text-xs text-slate-400 mb-2">
                 <span>
-                  {language === 'ta'
-                    ? `${currentProgress.completedLessons} / ${currentProgress.totalLessons} பாடங்கள் நிறைவுற்றன`
-                    : `${currentProgress.completedLessons} of ${currentProgress.totalLessons} lessons completed`}
+                  {currentProgress.completedLessons} of ${currentProgress.totalLessons} lessons completed
                 </span>
                 <span className="font-bold text-cyan-300">{currentProgress.percentage}%</span>
               </div>
@@ -224,7 +208,7 @@ export const Homepage: React.FC = () => {
                 onClick={() => handleStartCourse(currentCourse.id)}
                 className="inline-flex items-center gap-2 rounded-xl bg-violet-600 px-4 py-2 text-xs font-bold text-white transition hover:bg-violet-500 shadow-md shadow-violet-600/20"
               >
-                <span>{language === 'ta' ? 'அடுத்த பாடம் தொடங்கு' : 'Resume Next Lesson'}</span>
+                <span>Resume Next Lesson</span>
                 <ArrowRight className="h-3.5 w-3.5" />
               </button>
 
@@ -232,7 +216,7 @@ export const Homepage: React.FC = () => {
                 onClick={() => setActiveCourseAndLesson(currentCourse.id)}
                 className="text-xs font-semibold text-slate-400 hover:text-slate-200 transition"
               >
-                {language === 'ta' ? 'பாடத்திட்டம் பார்க்க' : 'View Path Details'} &rarr;
+                View Path Details &rarr;
               </button>
             </div>
           </div>
@@ -246,7 +230,7 @@ export const Homepage: React.FC = () => {
           <div className="flex items-start justify-between">
             <div className="inline-flex items-center gap-1.5 rounded-lg border border-amber-500/30 bg-amber-500/15 px-2.5 py-1 text-xs font-bold text-amber-300">
               <Zap className="h-3.5 w-3.5" />
-              <span>{language === 'ta' ? 'இன்றைய சவால்' : 'Daily Challenge'}</span>
+              <span>Daily Challenge</span>
             </div>
             <span className="text-xs font-bold text-amber-400">+{todayChallenge.xpReward} XP</span>
           </div>
@@ -268,9 +252,7 @@ export const Homepage: React.FC = () => {
                 ? 'bg-emerald-500/20 text-emerald-300'
                 : 'bg-amber-400 text-slate-950 group-hover:bg-amber-300'
             }`}>
-              {isTodayChallengeDone 
-                ? (language === 'ta' ? 'முடிந்தது' : 'Completed') 
-                : (language === 'ta' ? 'சவாலை தொடங்கு' : 'Start Challenge')}
+              {isTodayChallengeDone ? 'Completed' : 'Start Challenge'}
               <ChevronRight className="h-3.5 w-3.5" />
             </span>
           </div>
@@ -288,7 +270,7 @@ export const Homepage: React.FC = () => {
               </div>
               <div>
                 <span className="text-[11px] font-bold uppercase tracking-wider text-cyan-300">
-                  {language === 'ta' ? 'பரிந்துரைக்கப்படும் அடுத்த படி' : 'Recommended Next Step'}
+                  Recommended Next Step
                 </span>
                 <h3 className="font-heading text-lg font-bold text-white">
                   {t(nextRecommendedLesson.lesson.title)}
@@ -303,7 +285,7 @@ export const Homepage: React.FC = () => {
               onClick={() => setActiveCourseAndLesson(nextRecommendedLesson.course.id, nextRecommendedLesson.lesson.id)}
               className="inline-flex items-center justify-center gap-2 rounded-xl bg-violet-600 px-5 py-2.5 text-xs font-bold text-white transition hover:bg-violet-500 shadow-md shadow-violet-600/25 shrink-0"
             >
-              <span>{language === 'ta' ? 'பாடத்திற்கு செல்ல' : 'Jump to Lesson'}</span>
+              <span>Jump to Lesson</span>
               <ArrowRight className="h-4 w-4" />
             </button>
           </div>
@@ -320,16 +302,14 @@ export const Homepage: React.FC = () => {
                 <Code2 className="w-5 h-5" />
               </span>
               <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
-                {language === 'ta' ? 'செயல்முறைப் பயிற்சி' : 'Hands-on Labs'}
+                Hands-on Labs
               </span>
             </div>
             <h3 className="text-lg font-bold text-white">
-              {language === 'ta' ? 'தொழில்நுட்பப் பயிற்சிக் கூடம்' : 'Interactive Practice Studio'}
+              Interactive Practice Studio
             </h3>
             <p className="text-xs text-slate-400 mt-1.5 leading-relaxed">
-              {language === 'ta'
-                ? 'இணையதள HTML/CSS/JS ஆய்வகம், C.T.C.O பிராம்ப்ட் மதிப்பீடு, ஆங்கில குரல் பேசும் பயிற்சி மற்றும் ATS ரெஸ்யூம் ஸ்கோரர்.'
-                : 'Live HTML/CSS/JS CodeLab, C.T.C.O Prompt Evaluator, Voice Speech Studio with filler analysis, and ATS Resume Scorer.'}
+              Live HTML/CSS/JS CodeLab, C.T.C.O Prompt Evaluator, Voice Speech Studio with filler analysis, and ATS Resume Scorer.
             </p>
           </div>
           <div className="mt-5 pt-4 border-t border-slate-800 flex items-center justify-between">
@@ -338,7 +318,7 @@ export const Homepage: React.FC = () => {
               onClick={() => setActiveTab('practice')}
               className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition shadow-md shadow-emerald-600/20"
             >
-              <span>{language === 'ta' ? 'கூடத்திற்குச் செல்' : 'Open Studio'}</span>
+              <span>Open Studio</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
@@ -352,16 +332,14 @@ export const Homepage: React.FC = () => {
                 <Brain className="w-5 h-5" />
               </span>
               <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-violet-500/10 text-violet-300 border border-violet-500/20">
-                {language === 'ta' ? 'நினைவுத்திறன்' : 'Spaced Repetition'}
+                Spaced Repetition
               </span>
             </div>
             <h3 className="text-lg font-bold text-white">
-              {language === 'ta' ? 'நினைவு அரங்கம் & 60 வினாடி மின்னல் சவால்' : 'Recall Arena & 60s Blitz Deck'}
+              Recall Arena & 60s Blitz Deck
             </h3>
             <p className="text-xs text-slate-400 mt-1.5 leading-relaxed">
-              {language === 'ta'
-                ? 'அனைத்துப் பாடங்களின் முக்கியக் கருத்துக்கள் அடங்கிய ஃப்ளாஷ்கார்டுகள், உச்சரிப்பு மற்றும் 60 வினாடி வேக வினாடி சவால்கள்.'
-                : 'Master concepts with spaced repetition flashcards, bilingual Tamil & English audio cards, and high-speed 60s recall trials.'}
+              Master concepts with spaced repetition flashcards, English audio cards, and high-speed 60s recall trials.
             </p>
           </div>
           <div className="mt-5 pt-4 border-t border-slate-800 flex items-center justify-between">
@@ -370,7 +348,7 @@ export const Homepage: React.FC = () => {
               onClick={() => setActiveTab('drills')}
               className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-bold transition shadow-md shadow-violet-600/20"
             >
-              <span>{language === 'ta' ? 'அரங்கிற்குச் செல்' : 'Enter Arena'}</span>
+              <span>Enter Arena</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
@@ -382,16 +360,14 @@ export const Homepage: React.FC = () => {
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           <div>
             <span className="text-xs font-bold uppercase tracking-wider text-violet-400">
-              {language === 'ta' ? 'திறன் வழிகாட்டிகள்' : 'Core Learning Paths'}
+              Core Learning Paths
             </span>
             <h2 className="mt-1 font-heading text-2xl sm:text-3xl font-black text-white">
-              {language === 'ta' ? 'நீங்கள் விரும்பும் துறையை தேர்ந்தெடுங்கள்' : 'Discover Your Next Practical Skill'}
+              Discover Your Next Practical Skill
             </h2>
           </div>
           <p className="text-xs sm:text-sm text-slate-400 max-w-md">
-            {language === 'ta' 
-              ? 'ஒவ்வொரு பாதையும் குறுகிய செய்முறைப் பாடங்கள், வினாடி வினா மற்றும் நிஜமான திட்டப்பணியுடன் நிறைவடைகிறது.'
-              : 'Every path follows the 6-step cycle: Goal → Modules → Lessons → Practice → Quiz → Project.'}
+            Every path follows the 6-step cycle: Goal → Modules → Lessons → Practice → Quiz → Project.
           </p>
         </div>
 
@@ -412,7 +388,7 @@ export const Homepage: React.FC = () => {
                       {course.category}
                     </span>
                     <span className="text-xs font-semibold text-slate-400">
-                      {course.estimatedHours} {language === 'ta' ? 'மணிநேரம்' : 'hrs'} · +{course.xpReward} XP
+                      {course.estimatedHours} hrs · +{course.xpReward} XP
                     </span>
                   </div>
 
@@ -428,7 +404,7 @@ export const Homepage: React.FC = () => {
                   <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-slate-400">
                     <div className="flex items-center gap-1">
                       <BookOpen className="h-3.5 w-3.5 text-violet-400" />
-                      <span>{course.modules.length} {language === 'ta' ? 'தொகுதிகள்' : 'Modules'}</span>
+                      <span>{course.modules.length} Modules</span>
                     </div>
                     <div className="flex items-center gap-1">
                       <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
@@ -448,10 +424,10 @@ export const Homepage: React.FC = () => {
                   <div className="text-xs font-semibold">
                     {isEnrolled ? (
                       <span className="text-cyan-300">
-                        {progress.completedLessons}/{progress.totalLessons} {language === 'ta' ? 'பாடங்கள் முடிந்தது' : 'done'} ({progress.percentage}%)
+                        {progress.completedLessons}/{progress.totalLessons} done ({progress.percentage}%)
                       </span>
                     ) : (
-                      <span className="text-slate-400">{language === 'ta' ? 'இலவச தொடக்கம்' : 'Free Access'}</span>
+                      <span className="text-slate-400">Free Access</span>
                     )}
                   </div>
 
@@ -459,7 +435,7 @@ export const Homepage: React.FC = () => {
                     onClick={() => handleStartCourse(course.id)}
                     className="inline-flex items-center gap-1.5 rounded-xl bg-slate-800 px-4 py-2 text-xs font-bold text-white transition hover:bg-violet-600 group-hover:bg-violet-600"
                   >
-                    <span>{isEnrolled ? (language === 'ta' ? 'தொடரவும்' : 'Continue') : (language === 'ta' ? 'தொடங்கு' : 'Start Path')}</span>
+                    <span>{isEnrolled ? 'Continue' : 'Start Path'}</span>
                     <ArrowRight className="h-3.5 w-3.5" />
                   </button>
                 </div>
@@ -476,21 +452,15 @@ export const Homepage: React.FC = () => {
           <div>
             <div className="inline-flex items-center gap-1.5 rounded-full border border-cyan-400/30 bg-cyan-400/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-cyan-300">
               <Layers3 className="h-3.5 w-3.5" />
-              <span>{language === 'ta' ? 'திட்டப்பணி மையம்' : 'Project Hub'}</span>
+              <span>Project Hub</span>
             </div>
 
             <h2 className="mt-3 font-heading text-2xl sm:text-4xl font-black text-white leading-tight">
-              {language === 'ta' ? (
-                <>கற்றலின் உண்மை சான்று நீங்கள் உருவாக்கும் படைப்புகளே.</>
-              ) : (
-                <>The proof of learning is what you can make.</>
-              )}
+              The proof of learning is what you can make.
             </h2>
 
             <p className="mt-3 text-sm text-slate-300 max-w-xl leading-relaxed">
-              {language === 'ta'
-                ? 'வெறும் சான்றிதழ்கள் மட்டும் போதாது. தொழில் நிறுவனங்கள் உங்கள் நேரலை போர்ட்ஃபோலியோவையும் படைப்புகளையும் பார்க்க விரும்புகின்றன. வழிகாட்டப்பட்ட திட்டப்பணிகளை முடித்து நேரலை ஆதாரங்களை சமர்ப்பியுங்கள்.'
-                : 'Turn every skill into portfolio evidence. Follow step-by-step checklists, use starter code templates, submit GitHub or live deployment proof, and get verified.'}
+              Turn every skill into portfolio evidence. Follow step-by-step checklists, use starter code templates, submit GitHub or live deployment proof, and get verified.
             </p>
 
             <div className="mt-6 flex flex-wrap gap-4">
@@ -498,14 +468,14 @@ export const Homepage: React.FC = () => {
                 onClick={() => setActiveTab('projects')}
                 className="inline-flex items-center gap-2 rounded-xl bg-cyan-400 px-5 py-2.5 text-xs font-bold text-slate-950 transition hover:bg-cyan-300 shadow-lg shadow-cyan-400/20"
               >
-                <span>{language === 'ta' ? 'அனைத்து திட்டப்பணிகளையும் பார்க்க' : 'Explore All Projects'}</span>
+                <span>Explore All Projects</span>
                 <ArrowRight className="h-4 w-4" />
               </button>
               <button
                 onClick={() => setActiveTab('dashboard')}
                 className="inline-flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-900/60 px-5 py-2.5 text-xs font-bold text-slate-200 transition hover:bg-slate-800"
               >
-                <span>{language === 'ta' ? 'உங்கள் வளர்ச்சி நிலை' : 'Your Growth Dashboard'}</span>
+                <span>Your Growth Dashboard</span>
               </button>
             </div>
           </div>
@@ -543,17 +513,17 @@ export const Homepage: React.FC = () => {
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
             <span className="text-xs font-bold uppercase tracking-wider text-violet-400">
-              {language === 'ta' ? 'தொடர் முன்னேற்றம்' : 'Your Momentum'}
+              Your Momentum
             </span>
             <h3 className="mt-1 font-heading text-xl sm:text-2xl font-bold text-white">
-              {language === 'ta' ? 'இந்த வார கற்றல் பயணம்' : 'Consistency & Progress'}
+              Consistency & Progress
             </h3>
           </div>
           <button 
             onClick={() => setActiveTab('dashboard')}
             className="text-xs font-bold text-cyan-400 hover:text-cyan-300"
           >
-            {language === 'ta' ? 'முழுமையான அறிக்கை' : 'Full Dashboard'} &rarr;
+            Full Dashboard &rarr;
           </button>
         </div>
 
@@ -561,24 +531,24 @@ export const Homepage: React.FC = () => {
           <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-4">
             <Flame className="h-5 w-5 text-amber-400" />
             <div className="mt-2 font-heading text-2xl font-black text-white">{userState.streak}</div>
-            <div className="text-xs text-slate-400">{language === 'ta' ? 'நாள் தொடர்ச்சி' : 'Day Streak'}</div>
+            <div className="text-xs text-slate-400">Day Streak</div>
           </div>
           <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-4">
             <Trophy className="h-5 w-5 text-violet-400" />
             <div className="mt-2 font-heading text-2xl font-black text-white">{userState.xp}</div>
-            <div className="text-xs text-slate-400">{language === 'ta' ? 'மொத்த XP' : 'Total XP'}</div>
+            <div className="text-xs text-slate-400">Total XP</div>
           </div>
           <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-4">
             <CheckCircle className="h-5 w-5 text-cyan-400" />
             <div className="mt-2 font-heading text-2xl font-black text-white">{userState.completedLessonIds.length}</div>
-            <div className="text-xs text-slate-400">{language === 'ta' ? 'முடித்த பாடங்கள்' : 'Lessons Done'}</div>
+            <div className="text-xs text-slate-400">Lessons Done</div>
           </div>
           <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-4">
             <ShieldCheck className="h-5 w-5 text-emerald-400" />
             <div className="mt-2 font-heading text-2xl font-black text-white">
               {Object.keys(userState.projectSubmissions).length}
             </div>
-            <div className="text-xs text-slate-400">{language === 'ta' ? 'திட்டப்பணிகள்' : 'Projects Done'}</div>
+            <div className="text-xs text-slate-400">Projects Done</div>
           </div>
         </div>
 

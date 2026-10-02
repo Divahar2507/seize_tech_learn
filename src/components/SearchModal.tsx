@@ -28,7 +28,6 @@ export const SearchModal: React.FC = () => {
     setOpenSearchModal,
     allCourses,
     allProjects,
-    language,
     t,
     setActiveCourseAndLesson,
     setActiveProjectId,
@@ -83,8 +82,8 @@ export const SearchModal: React.FC = () => {
       {
         id: 'action-practice-web',
         type: 'tool',
-        title: language === 'ta' ? 'வலைத்தள கோடிங் பயிற்சி கூடம்' : 'Web Dev CodeLab & Sandbox',
-        subtitle: language === 'ta' ? 'HTML, CSS, மற்றும் JS நேரடியாக இயக்கிப் பாருங்கள்' : 'Live HTML, CSS & JavaScript Sandbox with templates',
+        title: 'Web Dev CodeLab & Sandbox',
+        subtitle: 'Live HTML, CSS & JavaScript Sandbox with templates',
         action: () => {
           setActiveTab('practice');
           setOpenSearchModal(false);
@@ -93,8 +92,8 @@ export const SearchModal: React.FC = () => {
       {
         id: 'action-practice-ai',
         type: 'tool',
-        title: language === 'ta' ? 'C.T.C.O பிராம்ப்ட் சோதனையகம்' : 'C.T.C.O Prompt Engineering Studio',
-        subtitle: language === 'ta' ? 'பிராம்ப்ட் தரம் மற்றும் ஸ்கோரிங் டூல்' : 'Test Context, Task, Constraints, Output scoring',
+        title: 'C.T.C.O Prompt Engineering Studio',
+        subtitle: 'Test Context, Task, Constraints, Output scoring',
         action: () => {
           setActiveTab('practice');
           setOpenSearchModal(false);
@@ -103,8 +102,8 @@ export const SearchModal: React.FC = () => {
       {
         id: 'action-drills',
         type: 'tool',
-        title: language === 'ta' ? 'நினைவுத்திறன் & 60 வினாடி மின்னல் சவால்' : 'Recall Arena & 60s Blitz Deck',
-        subtitle: language === 'ta' ? 'அனைத்து பாடங்களின் ஃப்ளாஷ்கார்டுகள்' : 'Spaced repetition flashcard challenges and speed trials',
+        title: 'Recall Arena & 60s Blitz Deck',
+        subtitle: 'Spaced repetition flashcard challenges and speed trials',
         action: () => {
           setActiveTab('drills');
           setOpenSearchModal(false);
@@ -113,8 +112,8 @@ export const SearchModal: React.FC = () => {
       {
         id: 'action-roadmaps',
         type: 'roadmap',
-        title: language === 'ta' ? 'தொழில் வழிகாட்டி வரைபடங்கள்' : 'Career Roadmaps & Milestones',
-        subtitle: language === 'ta' ? 'தொழில்முறைப் பாதைகள் மற்றும் சான்றிதழ்' : 'Step-by-step career tracks and placement guides',
+        title: 'Career Roadmaps & Milestones',
+        subtitle: 'Step-by-step career tracks and placement guides',
         action: () => {
           setActiveTab('roadmaps');
           setOpenSearchModal(false);
@@ -219,7 +218,7 @@ export const SearchModal: React.FC = () => {
     });
 
     return results.slice(0, 10);
-  }, [query, allCourses, allProjects, language, t, setActiveCourseAndLesson, setActiveProjectId, setActiveTab, setOpenSearchModal]);
+  }, [query, allCourses, allProjects, t, setActiveCourseAndLesson, setActiveProjectId, setActiveTab, setOpenSearchModal]);
 
   // Keyboard navigation within the results list
   const handleKeyDownInModal = (e: React.KeyboardEvent) => {
@@ -260,7 +259,7 @@ export const SearchModal: React.FC = () => {
               setQuery(e.target.value);
               setSelectedIndex(0);
             }}
-            placeholder={language === 'ta' ? 'பாடங்கள், திறன்கள், திட்டங்களை தேடுங்கள்...' : 'Search lessons, skills, code sandbox, projects...'}
+            placeholder="Search lessons, skills, code sandbox, projects..."
             className="flex-1 bg-transparent text-white placeholder-slate-500 text-sm focus:outline-none"
           />
           {query && (
@@ -281,7 +280,7 @@ export const SearchModal: React.FC = () => {
           {searchResults.length === 0 ? (
             <div className="text-center py-12 text-slate-400 text-sm">
               <Search className="w-8 h-8 text-slate-600 mx-auto mb-2" />
-              <span>{language === 'ta' ? 'முடிவுகள் எதுவும் கிடைக்கவில்லை' : 'No results found for'} "{query}"</span>
+              <span>No results found for "{query}"</span>
             </div>
           ) : (
             searchResults.map((item, idx) => {

@@ -13,7 +13,6 @@ import { useLearning } from '../context/LearningContext';
 
 export const DailyChallengeModal: React.FC = () => {
   const { 
-    language, 
     t, 
     openDailyChallengeModal, 
     setOpenDailyChallengeModal, 
@@ -57,7 +56,7 @@ export const DailyChallengeModal: React.FC = () => {
             </span>
             <div>
               <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400">
-                {language === 'ta' ? 'இன்றைய விரைவு சவால்' : 'Daily Challenge'}
+                Daily Challenge
               </span>
               <h3 className="font-heading text-lg font-bold text-white">
                 {t(todayChallenge.title)}
@@ -124,7 +123,7 @@ export const DailyChallengeModal: React.FC = () => {
         {(submitted || isAlreadyDone) && q && (
           <div className={`rounded-xl p-4 text-xs leading-relaxed ${isCorrect ? 'bg-emerald-950/40 border border-emerald-500/30 text-emerald-200' : 'bg-slate-950 border border-slate-800 text-slate-300'}`}>
             <strong className="block font-bold mb-1">
-              {isCorrect ? (language === 'ta' ? 'அருமை! சரியான விடை!' : 'Outstanding! Correct Answer!') : (language === 'ta' ? 'விளக்கம்:' : 'Explanation:')}
+              {isCorrect ? 'Outstanding! Correct Answer!' : 'Explanation:'}
             </strong>
             {t(q.explanation)}
           </div>
@@ -138,14 +137,14 @@ export const DailyChallengeModal: React.FC = () => {
               disabled={selectedOption === null}
               className="w-full rounded-xl bg-amber-400 py-3 text-xs font-bold text-slate-950 transition hover:bg-amber-300 disabled:opacity-50"
             >
-              {language === 'ta' ? 'விடையை சரிபார் (+XP)' : 'Check Answer (+XP)'}
+              Check Answer (+XP)
             </button>
           ) : (
             <button
               onClick={() => setOpenDailyChallengeModal(false)}
               className="w-full rounded-xl bg-slate-800 py-3 text-xs font-bold text-white transition hover:bg-slate-700"
             >
-              {language === 'ta' ? 'நிறைவு செய்க' : 'Close Challenge'}
+              Close Challenge
             </button>
           )}
         </div>

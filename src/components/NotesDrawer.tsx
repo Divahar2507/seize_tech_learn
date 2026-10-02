@@ -13,7 +13,6 @@ import { UserNote } from '../types/learning';
 
 export const NotesDrawer: React.FC = () => {
   const { 
-    language, 
     t, 
     openNotesDrawer, 
     setOpenNotesDrawer, 
@@ -70,7 +69,7 @@ export const NotesDrawer: React.FC = () => {
           <div className="flex items-center gap-2">
             <FileText className="h-5 w-5 text-cyan-400" />
             <h3 className="font-heading text-lg font-bold text-white">
-              {language === 'ta' ? 'கற்றல் குறிப்பேடு' : 'Study Notes'}
+              Study Notes
             </h3>
           </div>
 
@@ -98,7 +97,7 @@ export const NotesDrawer: React.FC = () => {
           <div className="space-y-3 rounded-2xl border border-slate-800 bg-slate-950 p-4">
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-bold uppercase tracking-wider text-violet-400">
-                {language === 'ta' ? 'நடப்பு பாடம்' : 'Current Lesson'}
+                Current Lesson
               </span>
               <span className="text-[11px] text-slate-500 font-mono truncate max-w-[150px]">
                 {t(activeLesson.title)}
@@ -109,7 +108,7 @@ export const NotesDrawer: React.FC = () => {
               rows={6}
               value={currentNoteText}
               onChange={e => setCurrentNoteText(e.target.value)}
-              placeholder={language === 'ta' ? 'உங்கள் சொந்த குறிப்புகளை இங்கே எழுதுங்கள்...' : 'Jot down key takeaways, code snippets, or interview ideas here...'}
+              placeholder="Jot down key takeaways, code snippets, or interview ideas here..."
               className="w-full resize-none rounded-xl border border-slate-800 bg-slate-900/90 p-3 text-xs text-white outline-none focus:border-cyan-400 font-mono leading-relaxed"
             />
 
@@ -119,7 +118,7 @@ export const NotesDrawer: React.FC = () => {
                 className="inline-flex items-center gap-1.5 rounded-xl bg-violet-600 px-4 py-2 text-xs font-bold text-white hover:bg-violet-500 transition"
               >
                 <Save className="h-3.5 w-3.5" />
-                <span>{savedSuccess ? (language === 'ta' ? 'சேமிக்கப்பட்டது!' : 'Saved!') : (language === 'ta' ? 'சேமிக்க' : 'Save Note')}</span>
+                <span>{savedSuccess ? 'Saved!' : 'Save Note'}</span>
               </button>
 
               {userState.notes[`note-${activeLesson.id}`] && (
@@ -141,7 +140,7 @@ export const NotesDrawer: React.FC = () => {
         {/* Saved Notes History */}
         <div className="space-y-3 flex-1">
           <h4 className="font-heading text-xs font-bold uppercase tracking-wider text-slate-400">
-            {language === 'ta' ? 'சேமிக்கப்பட்ட அனைத்து குறிப்புகள்' : 'Saved Notes Archive'} ({allSavedNotes.length})
+            Saved Notes Archive ({allSavedNotes.length})
           </h4>
 
           {allSavedNotes.length > 0 ? (
@@ -170,7 +169,7 @@ export const NotesDrawer: React.FC = () => {
             </div>
           ) : (
             <div className="rounded-xl border border-dashed border-slate-800 p-6 text-center text-xs text-slate-500">
-              {language === 'ta' ? 'இன்னும் எந்த குறிப்பும் சேமிக்கப்படவில்லை.' : 'No notes saved yet. Write insights from any lesson!'}
+              No notes saved yet. Write insights from any lesson!
             </div>
           )}
         </div>

@@ -3,7 +3,6 @@ import {
   Sparkles, 
   Flame, 
   Trophy, 
-  Languages, 
   Compass, 
   Layers3, 
   User, 
@@ -22,9 +21,6 @@ import { useLearning } from '../context/LearningContext';
 
 export const Header: React.FC = () => {
   const { 
-    language, 
-    setLanguage, 
-    t, 
     userState, 
     activeTab, 
     setActiveTab, 
@@ -71,7 +67,7 @@ export const Header: React.FC = () => {
                 )}
               </div>
               <p className="hidden text-[10px] font-semibold text-slate-400 sm:block">
-                {language === 'ta' ? 'திறன் முதல் தொழில் வரை' : 'Practical Skills to Career'}
+                Practical Skills to Career
               </p>
             </div>
           </Link>
@@ -87,7 +83,7 @@ export const Header: React.FC = () => {
               }`}
             >
               <Compass className="h-4 w-4 text-violet-400" />
-              {language === 'ta' ? 'முகப்பு' : 'Discover'}
+              Discover
             </button>
             <button
               onClick={() => handleNavClick('practice')}
@@ -98,7 +94,7 @@ export const Header: React.FC = () => {
               }`}
             >
               <Code2 className="h-4 w-4 text-emerald-400" />
-              {language === 'ta' ? 'பயிற்சி கூடம்' : 'Practice'}
+              Practice
             </button>
             <button
               onClick={() => handleNavClick('drills')}
@@ -109,7 +105,7 @@ export const Header: React.FC = () => {
               }`}
             >
               <Brain className="h-4 w-4 text-pink-400" />
-              {language === 'ta' ? 'நினைவு அரங்கம்' : 'Drills'}
+              Drills
             </button>
             <button
               onClick={() => handleNavClick('projects')}
@@ -120,7 +116,7 @@ export const Header: React.FC = () => {
               }`}
             >
               <Layers3 className="h-4 w-4 text-cyan-400" />
-              {language === 'ta' ? 'திட்டப்பணி மையம்' : 'Projects'}
+              Projects
             </button>
             <button
               onClick={() => handleNavClick('roadmaps')}
@@ -131,7 +127,7 @@ export const Header: React.FC = () => {
               }`}
             >
               <Milestone className="h-4 w-4 text-amber-400" />
-              {language === 'ta' ? 'வழிகாட்டிகள்' : 'Roadmaps'}
+              Roadmaps
             </button>
             <button
               onClick={() => handleNavClick('dashboard')}
@@ -142,12 +138,12 @@ export const Header: React.FC = () => {
               }`}
             >
               <Trophy className="h-4 w-4 text-violet-400" />
-              {language === 'ta' ? 'வளர்ச்சி பலகை' : 'Growth'}
+              Growth
             </button>
           </nav>
         </div>
 
-        {/* Right Side Utilities: Search, Language, Daily Challenge, Streak, XP, Profile */}
+        {/* Right Side Utilities: Search, Daily Challenge, Streak, XP, Profile */}
         <div className="flex items-center gap-2 sm:gap-3">
           
           {/* Quick Search Palette Trigger */}
@@ -157,35 +153,9 @@ export const Header: React.FC = () => {
             title="Search anything (Ctrl+K or /)"
           >
             <Search className="h-3.5 w-3.5 text-slate-400" />
-            <span className="hidden sm:inline">{language === 'ta' ? 'தேடு...' : 'Search...'}</span>
+            <span className="hidden sm:inline">Search...</span>
             <kbd className="hidden sm:inline font-mono text-[10px] bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700 text-slate-400">Ctrl K</kbd>
           </button>
-          
-          {/* Tamil / English Toggle */}
-          <div className="flex items-center rounded-lg border border-slate-800 bg-slate-900/90 p-1">
-            <button
-              onClick={() => setLanguage('en')}
-              className={`rounded px-2 py-0.5 text-xs font-bold transition ${
-                language === 'en'
-                  ? 'bg-violet-600 text-white shadow'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-              title="English"
-            >
-              EN
-            </button>
-            <button
-              onClick={() => setLanguage('ta')}
-              className={`rounded px-2 py-0.5 text-xs font-bold transition ${
-                language === 'ta'
-                  ? 'bg-violet-600 text-white shadow'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-              title="தமிழ் (Tamil)"
-            >
-              தமிழ்
-            </button>
-          </div>
 
           {/* Daily Challenge Quick Button */}
           <button
@@ -201,7 +171,7 @@ export const Header: React.FC = () => {
             ) : (
               <Zap className="h-3.5 w-3.5 text-amber-400 animate-pulse" />
             )}
-            <span>{language === 'ta' ? 'தினசரி சவால்' : 'Daily Challenge'}</span>
+            <span>Daily Challenge</span>
           </button>
 
           {/* Streak Indicator */}
@@ -264,7 +234,7 @@ export const Header: React.FC = () => {
             }`}
           >
             <Compass className="h-4 w-4 text-violet-400" />
-            <span>{language === 'ta' ? 'முகப்பு (Discover)' : 'Discover'}</span>
+            <span>Discover</span>
           </button>
 
           <button
@@ -274,7 +244,7 @@ export const Header: React.FC = () => {
             }`}
           >
             <Code2 className="h-4 w-4 text-emerald-400" />
-            <span>{language === 'ta' ? 'பயிற்சி கூடம் (Practice Studio)' : 'Practice Studio'}</span>
+            <span>Practice Studio</span>
           </button>
 
           <button
@@ -284,7 +254,7 @@ export const Header: React.FC = () => {
             }`}
           >
             <Brain className="h-4 w-4 text-pink-400" />
-            <span>{language === 'ta' ? 'நினைவு அரங்கம் (Recall Arena)' : 'Recall Arena'}</span>
+            <span>Recall Arena</span>
           </button>
 
           <button
@@ -294,7 +264,7 @@ export const Header: React.FC = () => {
             }`}
           >
             <Layers3 className="h-4 w-4 text-cyan-400" />
-            <span>{language === 'ta' ? 'திட்டப்பணி மையம் (Project Hub)' : 'Project Hub'}</span>
+            <span>Project Hub</span>
           </button>
 
           <button
@@ -304,7 +274,7 @@ export const Header: React.FC = () => {
             }`}
           >
             <Milestone className="h-4 w-4 text-amber-400" />
-            <span>{language === 'ta' ? 'தொழில் வழிகாட்டிகள் (Roadmaps)' : 'Career Roadmaps'}</span>
+            <span>Career Roadmaps</span>
           </button>
 
           <button
@@ -314,7 +284,7 @@ export const Header: React.FC = () => {
             }`}
           >
             <Trophy className="h-4 w-4 text-violet-400" />
-            <span>{language === 'ta' ? 'வளர்ச்சி பலகை (Growth Dashboard)' : 'Growth Dashboard'}</span>
+            <span>Growth Dashboard</span>
           </button>
 
           <button
@@ -325,7 +295,7 @@ export const Header: React.FC = () => {
             className="w-full flex items-center gap-2.5 rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-2.5 text-sm font-semibold text-amber-300"
           >
             <Zap className="h-4 w-4 text-amber-400" />
-            <span>{language === 'ta' ? 'இன்றைய தினசரி சவால்' : 'Daily Challenge'}</span>
+            <span>Daily Challenge</span>
           </button>
         </div>
       )}

@@ -25,7 +25,6 @@ import { LearningCategory } from '../types/learning';
 
 export const GrowthDashboard: React.FC = () => {
   const { 
-    language, 
     t, 
     userState, 
     allCourses, 
@@ -69,7 +68,7 @@ export const GrowthDashboard: React.FC = () => {
       const d = new Date(today);
       d.setDate(d.getDate() - i);
       const dateStr = d.toISOString().split('T')[0];
-      const displayDate = d.toLocaleDateString(language === 'ta' ? 'ta-IN' : 'en-US', {
+      const displayDate = d.toLocaleDateString('en-US', {
         weekday: 'short',
         month: 'short',
         day: 'numeric'
@@ -81,21 +80,21 @@ export const GrowthDashboard: React.FC = () => {
       // Check streak active days
       if (i < streakCount) {
         count += 2;
-        actions.push(language === 'ta' ? 'தொடர் கற்றல் அமர்வு' : 'Active Streak Study Session');
+        actions.push('Active Streak Study Session');
       }
 
       // Check completed daily challenges
       const challengeMatches = userState.completedDailyChallenges.filter(ch => ch.includes(dateStr));
       if (challengeMatches.length > 0) {
         count += 2;
-        actions.push(language === 'ta' ? 'தினசரி சவால் நிறைவு' : 'Daily Challenge Solved (+40 XP)');
+        actions.push('Daily Challenge Solved (+40 XP)');
       }
 
       // Check quiz records
       Object.values(userState.quizRecords).forEach(rec => {
         if (rec.completedAt && rec.completedAt.startsWith(dateStr)) {
           count += 1;
-          actions.push(language === 'ta' ? `வினாடி வினா வெற்றி (${rec.score}/${rec.totalQuestions})` : `Quiz Passed (${rec.score}/${rec.totalQuestions})`);
+          actions.push(`Quiz Passed (${rec.score}/${rec.totalQuestions})`);
         }
       });
 
@@ -103,7 +102,7 @@ export const GrowthDashboard: React.FC = () => {
       Object.values(userState.projectSubmissions).forEach(sub => {
         if (sub.submittedAt && sub.submittedAt.startsWith(dateStr)) {
           count += 3;
-          actions.push(language === 'ta' ? 'திட்டப்பணி சமர்ப்பிக்கப்பட்டது' : 'Project Submission Verified');
+          actions.push('Project Submission Verified');
         }
       });
 
@@ -118,12 +117,12 @@ export const GrowthDashboard: React.FC = () => {
         displayDate,
         count,
         level,
-        actions: actions.length > 0 ? actions : [language === 'ta' ? 'செயல்பாடு இல்லை' : 'No learning activities recorded']
+        actions: actions.length > 0 ? actions : ['No learning activities recorded']
       });
     }
 
     return days;
-  }, [userState, language]);
+  }, [userState]);
 
   const activeDaysCount = heatmapDays.filter(d => d.count > 0).length;
   const consistencyRate = Math.round((activeDaysCount / heatmapDays.length) * 100);
@@ -136,15 +135,13 @@ export const GrowthDashboard: React.FC = () => {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
             <span className="rounded-lg border border-violet-400/30 bg-violet-500/10 px-2.5 py-1 text-xs font-bold uppercase tracking-wider text-violet-300">
-              {language === 'ta' ? 'கற்றல் வளர்ச்சி பலகை' : 'Learner Growth Dossier'}
+              Learner Growth Dossier
             </span>
             <h1 className="mt-3 font-heading text-3xl sm:text-4xl font-black text-white">
-              {language === 'ta' ? 'உங்கள் தினசரி முன்னேற்றம்' : 'Your Momentum & Achievements'}
+              Your Momentum & Achievements
             </h1>
             <p className="mt-2 text-xs sm:text-sm text-slate-300">
-              {language === 'ta' 
-                ? 'உங்கள் கற்றல் வேகம், முடிக்கப்பட்ட திட்டப்பணிகள் மற்றும் பெற்ற சான்றிதழ்களின் முழு விவரம்.'
-                : 'Track your skill acquisition, verified portfolio projects, streak habits, and career credentials.'}
+              Track your skill acquisition, verified portfolio projects, streak habits, and career credentials.
             </p>
           </div>
 
@@ -154,7 +151,7 @@ export const GrowthDashboard: React.FC = () => {
             </div>
             <div>
               <div className="text-xs font-bold uppercase text-slate-400">
-                {language === 'ta' ? 'திறன் நிலை' : 'Skill Tier'}
+                Skill Tier
               </div>
               <div className="font-heading text-lg font-black text-white">
                 {userState.user.displayName || 'Learner'}
@@ -176,13 +173,11 @@ export const GrowthDashboard: React.FC = () => {
                 <Calendar className="h-4 w-4" />
               </span>
               <h3 className="font-heading text-lg sm:text-xl font-bold text-white">
-                {language === 'ta' ? '30-நாள் நேரடி செயல்பாடு வரைபடம்' : '30-Day Learning Activity Heatmap'}
+                30-Day Learning Activity Heatmap
               </h3>
             </div>
             <p className="mt-1 text-xs text-slate-400">
-              {language === 'ta'
-                ? 'தினசரி பயிற்சி அமர்வுகள், வினாடி வினாக்கள் மற்றும் திட்டப்பணி சமர்ப்பிப்புகளைக் கண்காணிக்கும் கிரிட்.'
-                : 'GitHub-style consistency matrix visualizing daily code labs, quiz challenges, and streak habits.'}
+              GitHub-style consistency matrix visualizing daily code labs, quiz challenges, and streak habits.
             </p>
           </div>
 
@@ -190,18 +185,18 @@ export const GrowthDashboard: React.FC = () => {
           <div className="flex flex-wrap items-center gap-2">
             <div className="flex items-center gap-1.5 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-xs font-bold text-amber-300">
               <Flame className="h-3.5 w-3.5 fill-current" />
-              <span>{userState.streak} {language === 'ta' ? 'நாட்கள் தொடர்' : 'Day Streak'}</span>
+              <span>{userState.streak} Day Streak</span>
             </div>
             <div className="flex items-center gap-1.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs font-bold text-emerald-300">
               <Zap className="h-3.5 w-3.5" />
-              <span>{activeDaysCount}/35 {language === 'ta' ? 'செயல்பாட்டு நாட்கள்' : 'Active Days'} ({consistencyRate}%)</span>
+              <span>{activeDaysCount}/35 Active Days ({consistencyRate}%)</span>
             </div>
             <button
               onClick={() => setOpenDailyChallengeModal(true)}
               className="inline-flex items-center gap-1 rounded-xl bg-violet-600 hover:bg-violet-500 px-3 py-1.5 text-xs font-bold text-white transition shadow-sm"
             >
               <Sparkles className="h-3.5 w-3.5" />
-              <span>{language === 'ta' ? 'இன்றைய சவால்' : "Today's Challenge"}</span>
+              <span>Today's Challenge</span>
             </button>
           </div>
         </div>
@@ -267,14 +262,14 @@ export const GrowthDashboard: React.FC = () => {
                 <span className="font-bold text-white">{selectedDayInfo.displayDate}:</span>
                 <span className="text-emerald-400 font-semibold">
                   {selectedDayInfo.count > 0 
-                    ? `${selectedDayInfo.count} ${language === 'ta' ? 'செயல்பாடுகள் முடிந்தது' : 'events completed'} (${selectedDayInfo.actions.join(', ')})`
-                    : (language === 'ta' ? 'செயல்பாடு பதிவு செய்யப்படவில்லை' : 'Rest day / No active modules recorded')
+                    ? `${selectedDayInfo.count} events completed (${selectedDayInfo.actions.join(', ')})`
+                    : 'Rest day / No active modules recorded'
                   }
                 </span>
               </div>
             ) : (
               <span className="text-slate-500">
-                {language === 'ta' ? 'விவரங்களைக் காண ஒரு கட்டத்தின் மீது சுட்டியை வைக்கவும்.' : 'Hover or tap on any calendar day to inspect milestones and logged XP.'}
+                Hover or tap on any calendar day to inspect milestones and logged XP.
               </span>
             )}
           </div>
@@ -294,7 +289,7 @@ export const GrowthDashboard: React.FC = () => {
       {/* 4 Category Skill Progress Bars */}
       <div className="space-y-4">
         <h3 className="font-heading text-lg font-bold text-white">
-          {language === 'ta' ? '4 துறைகளில் உங்கள் திறன் முன்னேற்றம்' : 'Skill Progress Across Launch Categories'}
+          Skill Progress Across Launch Categories
         </h3>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -325,7 +320,7 @@ export const GrowthDashboard: React.FC = () => {
                 </div>
 
                 <div className="text-[11px] text-slate-400">
-                  {progress.completedLessons} / {progress.totalLessons} {language === 'ta' ? 'பாடங்கள் முடிந்தது' : 'lessons done'}
+                  {progress.completedLessons} / {progress.totalLessons} lessons done
                 </div>
               </div>
             );
@@ -338,17 +333,17 @@ export const GrowthDashboard: React.FC = () => {
         <div className="flex items-center justify-between">
           <div>
             <h3 className="font-heading text-xl font-bold text-white">
-              {language === 'ta' ? 'சமர்ப்பிக்கப்பட்ட திட்டப்பணிகள் (போர்ட்ஃபோலியோ ஆதாரம்)' : 'Portfolio Projects & Proof of Work'}
+              Portfolio Projects & Proof of Work
             </h3>
             <p className="mt-1 text-xs text-slate-400">
-              {language === 'ta' ? 'வேலைவாய்ப்பு தேர்வாளர்களுக்கு நீங்கள் காட்டும் நேரடி படைப்புகள்.' : 'Live projects verifying your ability beyond theoretical claims.'}
+              Live projects verifying your ability beyond theoretical claims.
             </p>
           </div>
           <button 
             onClick={() => setActiveTab('projects')}
             className="text-xs font-bold text-cyan-400 hover:underline"
           >
-            {language === 'ta' ? 'புதிய திட்டப்பணி' : 'Go to Project Hub'} &rarr;
+            Go to Project Hub &rarr;
           </button>
         </div>
 
@@ -372,11 +367,11 @@ export const GrowthDashboard: React.FC = () => {
                     {isSubmitted ? (
                       <span className="inline-flex items-center gap-1 font-bold text-emerald-400">
                         <CheckCircle2 className="h-3.5 w-3.5" />
-                        {language === 'ta' ? 'சரிபார்க்கப்பட்டது' : 'Verified Submission'}
+                        Verified Submission
                       </span>
                     ) : (
                       <span className="text-slate-500">
-                        {language === 'ta' ? 'நிலுவையில் உள்ளது' : 'Not Started'}
+                        Not Started
                       </span>
                     )}
                   </div>
@@ -412,7 +407,7 @@ export const GrowthDashboard: React.FC = () => {
                     }}
                     className="text-xs font-bold text-violet-400 hover:text-white"
                   >
-                    {isSubmitted ? (language === 'ta' ? 'விவரங்கள் பார்க்க' : 'View Proof') : (language === 'ta' ? 'தொடங்க' : 'Start Project')} &rarr;
+                    {isSubmitted ? 'View Proof' : 'Start Project'} &rarr;
                   </button>
                 </div>
 
@@ -425,7 +420,7 @@ export const GrowthDashboard: React.FC = () => {
       {/* Earned Badges Showcase */}
       <div className="rounded-2xl border border-slate-800 bg-slate-900/50 p-6 sm:p-8 space-y-6">
         <h3 className="font-heading text-xl font-bold text-white">
-          {language === 'ta' ? 'பெற்ற சாதனைப் பதக்கங்கள்' : 'Unlocked Achievement Badges'}
+          Unlocked Achievement Badges
         </h3>
 
         <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
@@ -452,7 +447,7 @@ export const GrowthDashboard: React.FC = () => {
                   <span className={`rounded px-2 py-0.5 text-[9px] font-bold uppercase ${
                     isUnlocked ? 'bg-violet-500/20 text-violet-300' : 'bg-slate-800 text-slate-500'
                   }`}>
-                    {isUnlocked ? (language === 'ta' ? 'பெற்றது' : 'Earned') : (language === 'ta' ? 'பூட்டப்பட்டது' : 'Locked')}
+                    {isUnlocked ? 'Earned' : 'Locked'}
                   </span>
                 </div>
               </div>
@@ -466,10 +461,10 @@ export const GrowthDashboard: React.FC = () => {
         <div className="flex items-center justify-between">
           <div>
             <h3 className="font-heading text-xl font-bold text-white">
-              {language === 'ta' ? 'சரிபார்க்கப்பட்ட திறன் சான்றிதழ்கள்' : 'Accredited Skill Certificates'}
+              Accredited Skill Certificates
             </h3>
             <p className="mt-1 text-xs text-slate-400">
-              {language === 'ta' ? 'பாடங்களை முடித்து உங்கள் அதிகாரப்பூர்வ சான்றிதழை பெறுங்கள்.' : 'Awarded upon finishing 100% of a specialization curriculum.'}
+              Awarded upon finishing 100% of a specialization curriculum.
             </p>
           </div>
         </div>
@@ -534,7 +529,7 @@ export const GrowthDashboard: React.FC = () => {
                         className="inline-flex items-center gap-1.5 rounded-lg bg-violet-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-violet-500 transition"
                       >
                         <Printer className="h-3.5 w-3.5" />
-                        <span>{language === 'ta' ? 'சான்றிதழைப் பார்' : 'View / Print'}</span>
+                        <span>View / Print</span>
                       </button>
                     </div>
                   </div>
@@ -547,12 +542,10 @@ export const GrowthDashboard: React.FC = () => {
             <Award className="mx-auto h-10 w-10 text-violet-400 mb-2" />
             <div>
               <p className="text-sm font-semibold text-slate-200">
-                {language === 'ta' ? 'இன்னும் எந்த சான்றிதழும் பெறப்படவில்லை' : 'No certificates claimed yet'}
+                No certificates claimed yet
               </p>
               <p className="mt-1 text-xs text-slate-400 max-w-md mx-auto">
-                {language === 'ta' 
-                  ? 'ஒரு கற்றல் பாதையை முடித்து அல்லது உடனடி சான்றிதழைப் பெற்று உங்கள் LinkedIn கணக்கில் இணைத்துக்கொள்ளுங்கள்.'
-                  : 'Complete curriculum requirements or claim your first specialization certificate to sync directly with your LinkedIn profile.'}
+                Complete curriculum requirements or claim your first specialization certificate to sync directly with your LinkedIn profile.
               </p>
             </div>
             
@@ -562,14 +555,14 @@ export const GrowthDashboard: React.FC = () => {
                 className="inline-flex items-center gap-2 rounded-xl bg-violet-600 hover:bg-violet-500 px-4 py-2 text-xs font-bold text-white transition shadow-lg shadow-violet-600/20"
               >
                 <Sparkles className="h-3.5 w-3.5" />
-                <span>{language === 'ta' ? 'AI சான்றிதழைப் பெறுங்கள் (+400 XP)' : 'Claim AI Prompting Certificate (+400 XP)'}</span>
+                <span>Claim AI Prompting Certificate (+400 XP)</span>
               </button>
               <button
                 onClick={() => generateCertificate('course-web-dev')}
                 className="inline-flex items-center gap-2 rounded-xl border border-cyan-500/40 bg-cyan-500/10 hover:bg-cyan-500/20 px-4 py-2 text-xs font-bold text-cyan-300 transition"
               >
                 <Code2 className="h-3.5 w-3.5" />
-                <span>{language === 'ta' ? 'Web Dev சான்றிதழைப் பெறுங்கள் (+500 XP)' : 'Claim Web Dev Certificate (+500 XP)'}</span>
+                <span>Claim Web Dev Certificate (+500 XP)</span>
               </button>
             </div>
           </div>

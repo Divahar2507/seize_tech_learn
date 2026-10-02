@@ -3,7 +3,6 @@ import {
   ArrowLeft, 
   Bookmark, 
   FileText, 
-  Languages, 
   CheckCircle, 
   HelpCircle, 
   Sparkles, 
@@ -22,8 +21,6 @@ import { useLearning } from '../context/LearningContext';
 
 export const LessonPlayer: React.FC = () => {
   const { 
-    language, 
-    setLanguage, 
     t, 
     activeCourse, 
     activeLesson, 
@@ -102,34 +99,17 @@ export const LessonPlayer: React.FC = () => {
   return (
     <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8 space-y-8">
       
-      {/* Top Bar: Back, Language Switcher, Bookmarks, Notes Drawer */}
+      {/* Top Bar: Back, Bookmarks, Notes Drawer */}
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800 pb-4">
         <button
           onClick={() => setActiveTab('path')}
           className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-white transition"
         >
           <ArrowLeft className="h-4 w-4" />
-          <span>{language === 'ta' ? 'பாடத்திட்டம்' : 'Path Overview'}</span>
+          <span>Path Overview</span>
         </button>
 
         <div className="flex items-center gap-2">
-          
-          {/* Quick Bilingual Switcher */}
-          <div className="flex items-center rounded-lg border border-slate-800 bg-slate-900 px-1 py-0.5 text-xs font-bold">
-            <button
-              onClick={() => setLanguage('en')}
-              className={`rounded px-2 py-0.5 transition ${language === 'en' ? 'bg-violet-600 text-white' : 'text-slate-400 hover:text-white'}`}
-            >
-              EN
-            </button>
-            <button
-              onClick={() => setLanguage('ta')}
-              className={`rounded px-2 py-0.5 transition ${language === 'ta' ? 'bg-violet-600 text-white' : 'text-slate-400 hover:text-white'}`}
-            >
-              தமிழ்
-            </button>
-          </div>
-
           {/* Download Notes */}
           <button
             onClick={handleDownloadNotes}
@@ -137,7 +117,7 @@ export const LessonPlayer: React.FC = () => {
             title="Download Notes as Markdown"
           >
             <Download className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">{language === 'ta' ? 'குறிப்புகள் பதிவிறக்கு' : 'Save Notes'}</span>
+            <span className="hidden sm:inline">Save Notes</span>
           </button>
 
           {/* Notes Drawer Button */}
@@ -146,7 +126,7 @@ export const LessonPlayer: React.FC = () => {
             className="flex items-center gap-1 rounded-lg border border-slate-800 bg-slate-900/80 px-2.5 py-1.5 text-xs font-semibold text-slate-300 hover:text-white transition"
           >
             <FileText className="h-3.5 w-3.5 text-cyan-400" />
-            <span className="hidden sm:inline">{language === 'ta' ? 'குறிப்புகள்' : 'My Notes'}</span>
+            <span className="hidden sm:inline">My Notes</span>
           </button>
 
           {/* Bookmark Button */}
@@ -159,7 +139,7 @@ export const LessonPlayer: React.FC = () => {
             }`}
           >
             <Bookmark className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">{isBookmarked ? (language === 'ta' ? 'சேமிக்கப்பட்டது' : 'Saved') : (language === 'ta' ? 'புக்மார்க்' : 'Bookmark')}</span>
+            <span className="hidden sm:inline">{isBookmarked ? 'Saved' : 'Bookmark'}</span>
           </button>
 
         </div>
@@ -180,7 +160,7 @@ export const LessonPlayer: React.FC = () => {
         </h1>
 
         <p className="mt-3 rounded-xl border border-violet-500/20 bg-violet-500/5 p-4 text-xs sm:text-sm text-slate-300 leading-relaxed">
-          <strong className="text-violet-300">{language === 'ta' ? 'சுருக்கம்:' : 'Summary:'} </strong>
+          <strong className="text-violet-300">Summary: </strong>
           {t(activeLesson.summary)}
         </p>
       </div>
@@ -219,7 +199,7 @@ export const LessonPlayer: React.FC = () => {
       <div className="rounded-2xl border border-emerald-500/20 bg-emerald-950/10 p-6">
         <h4 className="flex items-center gap-2 font-heading text-base font-bold text-emerald-400">
           <CheckCircle className="h-5 w-5" />
-          <span>{language === 'ta' ? 'முக்கிய நினைவூட்டல்கள்' : 'Key Takeaways'}</span>
+          <span>Key Takeaways</span>
         </h4>
         <ul className="mt-4 space-y-2 text-xs sm:text-sm text-slate-300">
           {activeLesson.keyTakeaways.map((takeaway, i) => (
@@ -237,7 +217,7 @@ export const LessonPlayer: React.FC = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 font-heading text-base font-bold text-cyan-300">
               <Code className="h-5 w-5" />
-              <span>{language === 'ta' ? 'செய்முறைப் பயிற்சி' : 'Interactive Practice Challenge'}: {t(activeLesson.practiceTask.title)}</span>
+              <span>Interactive Practice Challenge: {t(activeLesson.practiceTask.title)}</span>
             </div>
             <span className="rounded-full bg-cyan-500/20 px-2.5 py-0.5 text-[10px] font-bold text-cyan-300">
               +25 Practice XP
@@ -258,13 +238,13 @@ export const LessonPlayer: React.FC = () => {
           {/* Interactive Workspace Area */}
           <div className="space-y-3 pt-2">
             <label className="block text-xs font-bold uppercase tracking-wider text-slate-400">
-              {language === 'ta' ? 'உங்கள் செய்முறை விடை / நிரலை இங்கே தட்டச்சு செய்யவும்:' : 'Your Practice Solution / Execution:'}
+              Your Practice Solution / Execution:
             </label>
             <textarea
               rows={4}
               value={practiceInput}
               onChange={e => setPracticeInput(e.target.value)}
-              placeholder={language === 'ta' ? 'உங்கள் பதிலை இங்கே எழுதவும்...' : 'Type your answer, prompt, or code snippet here...'}
+              placeholder="Type your answer, prompt, or code snippet here..."
               className="w-full rounded-xl border border-slate-700 bg-slate-950 p-3.5 font-mono text-xs text-white outline-none focus:border-cyan-400 leading-relaxed"
             />
 
@@ -278,7 +258,7 @@ export const LessonPlayer: React.FC = () => {
                 className="inline-flex items-center gap-1.5 rounded-xl bg-cyan-400 px-4 py-2 text-xs font-bold text-slate-950 hover:bg-cyan-300 transition disabled:opacity-40"
               >
                 <CheckCircle2 className="h-4 w-4" />
-                <span>{language === 'ta' ? 'சரிபார்க்கவும் / விடையுடன் ஒப்பிடவும்' : 'Verify & Compare with Solution'}</span>
+                <span>Verify & Compare with Solution</span>
               </button>
 
               {activeLesson.practiceTask.solutionOrSample && (
@@ -286,7 +266,7 @@ export const LessonPlayer: React.FC = () => {
                   onClick={() => setShowSampleSolution(!showSampleSolution)}
                   className="text-xs font-semibold text-cyan-300 hover:text-white"
                 >
-                  {showSampleSolution ? (language === 'ta' ? 'மாதிரி விடையை மறை' : 'Hide Sample') : (language === 'ta' ? 'மாதிரி விடையைக் காண்க' : 'View Sample Solution')}
+                  {showSampleSolution ? 'Hide Sample' : 'View Sample Solution'}
                 </button>
               )}
             </div>
@@ -296,7 +276,7 @@ export const LessonPlayer: React.FC = () => {
               <div className="mt-3 rounded-xl border border-emerald-500/30 bg-emerald-950/20 p-4 space-y-2">
                 <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-400">
                   <Sparkles className="h-4 w-4" />
-                  <span>{language === 'ta' ? 'வல்லுநரின் மாதிரி தீர்வு:' : 'Expert Reference Solution:'}</span>
+                  <span>Expert Reference Solution:</span>
                 </div>
                 <pre className="overflow-x-auto rounded-lg bg-slate-950 p-3 font-mono text-xs text-emerald-200">
                   {activeLesson.practiceTask.solutionOrSample}
@@ -313,7 +293,7 @@ export const LessonPlayer: React.FC = () => {
           <div className="flex items-center justify-between">
             <h4 className="flex items-center gap-2 font-heading text-lg font-bold text-white">
               <HelpCircle className="h-5 w-5 text-violet-400" />
-              <span>{language === 'ta' ? 'விரைவு வினாடி வினா' : 'Check Your Understanding'}</span>
+              <span>Check Your Understanding</span>
             </h4>
             <span className="text-xs font-semibold text-slate-400">
               +{activeLesson.quizQuestions.length * 25} XP
@@ -366,7 +346,7 @@ export const LessonPlayer: React.FC = () => {
                 {quizSubmitted && (
                   <div className={`rounded-lg p-3 text-xs leading-relaxed ${isCorrect ? 'bg-emerald-950/30 text-emerald-300' : 'bg-slate-900 text-slate-300'}`}>
                     <strong className="block font-bold mb-1">
-                      {isCorrect ? (language === 'ta' ? 'சரியான பதில்!' : 'Correct!') : (language === 'ta' ? 'விளக்கம்:' : 'Explanation:')}
+                      {isCorrect ? 'Correct!' : 'Explanation:'}
                     </strong>
                     {t(q.explanation)}
                   </div>
@@ -381,16 +361,16 @@ export const LessonPlayer: React.FC = () => {
               disabled={Object.keys(selectedAnswers).length === 0}
               className="w-full rounded-xl bg-violet-600 py-3 text-xs font-bold text-white transition hover:bg-violet-500 disabled:opacity-50"
             >
-              {language === 'ta' ? 'பதிலைச் சமர்ப்பி' : 'Submit Quiz Answers'}
+              Submit Quiz Answers
             </button>
           ) : (
             <div className="flex items-center justify-between border-t border-slate-800 pt-4 text-xs font-bold text-cyan-300">
-              <span>{language === 'ta' ? 'வினாடி வினா நிறைவுற்றது!' : 'Quiz Complete! XP Added to profile.'}</span>
+              <span>Quiz Complete! XP Added to profile.</span>
               <button 
                 onClick={() => setQuizSubmitted(false)}
                 className="text-slate-400 hover:text-white"
               >
-                {language === 'ta' ? 'மீண்டும் முயற்சி செய்' : 'Try Again'}
+                Try Again
               </button>
             </div>
           )}
@@ -402,7 +382,7 @@ export const LessonPlayer: React.FC = () => {
         <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-6 space-y-4">
           <div className="flex items-center gap-2 font-heading text-base font-bold text-amber-300">
             <Lightbulb className="h-5 w-5" />
-            <span>{language === 'ta' ? 'நினைவு மீட்டல் அட்டைகள் (Flashcards)' : 'Active Recall Flashcards'}</span>
+            <span>Active Recall Flashcards</span>
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2">
@@ -415,7 +395,7 @@ export const LessonPlayer: React.FC = () => {
                   className="cursor-pointer rounded-xl border border-slate-800 bg-slate-950 p-4 transition hover:border-amber-400/50"
                 >
                   <div className="text-[10px] font-bold uppercase text-amber-400 mb-1">
-                    {isRevealed ? (language === 'ta' ? 'விளக்கம்:' : 'Answer:') : (language === 'ta' ? 'கேள்வி (கிளிக் செய்து காண்க):' : 'Question (Click to flip):')}
+                    {isRevealed ? 'Answer:' : 'Question (Click to flip):'}
                   </div>
                   <p className="text-xs sm:text-sm font-semibold text-white">
                     {isRevealed ? t(fc.back) : t(fc.front)}
@@ -438,7 +418,7 @@ export const LessonPlayer: React.FC = () => {
           }`}
         >
           <CheckCircle2 className="h-4 w-4" />
-          <span>{isCompleted ? (language === 'ta' ? 'பாடம் முடிந்தது' : 'Lesson Completed') : (language === 'ta' ? 'பாடத்தை முடித்ததாகக் குறிக்க (+XP)' : 'Mark Lesson Complete (+XP)')}</span>
+          <span>{isCompleted ? 'Lesson Completed' : 'Mark Lesson Complete (+XP)'}</span>
         </button>
 
         {nextLesson && (
@@ -446,7 +426,7 @@ export const LessonPlayer: React.FC = () => {
             onClick={() => setActiveCourseAndLesson(activeCourse.id, nextLesson.id)}
             className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-violet-600 px-6 py-3 text-xs font-bold text-white transition hover:bg-violet-500 shadow-lg shadow-violet-600/20"
           >
-            <span>{language === 'ta' ? 'அடுத்த பாடம்' : 'Next Lesson'}: {t(nextLesson.title)}</span>
+            <span>Next Lesson: {t(nextLesson.title)}</span>
             <ArrowRight className="h-4 w-4" />
           </button>
         )}

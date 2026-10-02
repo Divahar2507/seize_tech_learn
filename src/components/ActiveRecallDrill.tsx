@@ -32,7 +32,7 @@ interface EnrichedCard {
 }
 
 export const ActiveRecallDrill: React.FC = () => {
-  const { allCourses, language, t, recordCardReview, triggerConfetti, setActiveCourseAndLesson, setActiveTab } = useLearning();
+  const { allCourses, t, recordCardReview, triggerConfetti, setActiveCourseAndLesson, setActiveTab } = useLearning();
 
   // Mode: 'spaced' (classic flashcards with self-assessment) or 'blitz' (60s speed trial)
   const [mode, setMode] = useState<'spaced' | 'blitz'>('spaced');
@@ -156,7 +156,7 @@ export const ActiveRecallDrill: React.FC = () => {
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = language === 'ta' ? 'ta-IN' : 'en-US';
+      utterance.lang = 'en-US';
       window.speechSynthesis.speak(utterance);
     }
   };
@@ -174,16 +174,14 @@ export const ActiveRecallDrill: React.FC = () => {
               <Brain className="w-6 h-6" />
             </span>
             <span className="text-xs font-bold uppercase tracking-wider text-violet-400">
-              {language === 'ta' ? 'செயலில் நினைவு பயிற்சி அரங்கம்' : 'Active Recall & Spaced Repetition'}
+              Active Recall & Spaced Repetition
             </span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
-            {language === 'ta' ? 'நினைவுத்திறன் & வேகப்பயிற்சி' : 'Recall Arena & Speed Drills'}
+            Recall Arena & Speed Drills
           </h1>
           <p className="text-sm text-slate-400 mt-1 max-w-xl">
-            {language === 'ta'
-              ? 'பாடங்களின் முக்கியக் கருத்துக்களை விரைவாக நினைவுகூர்ந்து தேர்ச்சி பெறுங்கள்.'
-              : 'Retain 90% of your course learnings through flashcards, spaced repetition, and 60-second speed trials.'}
+            Retain 90% of your course learnings through flashcards, spaced repetition, and 60-second speed trials.
           </p>
         </div>
 
@@ -198,7 +196,7 @@ export const ActiveRecallDrill: React.FC = () => {
             }`}
           >
             <Brain className="w-4 h-4" />
-            <span>{language === 'ta' ? 'நினைவு அட்டைகள்' : 'Spaced Deck'}</span>
+            <span>Spaced Deck</span>
           </button>
           <button
             onClick={() => { setMode('blitz'); }}
@@ -209,7 +207,7 @@ export const ActiveRecallDrill: React.FC = () => {
             }`}
           >
             <Zap className="w-4 h-4 text-amber-300" />
-            <span>{language === 'ta' ? '60 வினாடி வேகம்' : '60s Blitz'}</span>
+            <span>60s Blitz</span>
           </button>
         </div>
       </div>
@@ -226,7 +224,7 @@ export const ActiveRecallDrill: React.FC = () => {
                 : 'bg-slate-900/80 text-slate-400 hover:text-slate-200 border border-slate-800'
             }`}
           >
-            {language === 'ta' ? 'அனைத்தும்' : 'All Topics'} ({allCards.length})
+            All Topics ({allCards.length})
           </button>
           <button
             onClick={() => { setSelectedCategory('ai-tools'); setCurrentIndex(0); }}
@@ -274,11 +272,11 @@ export const ActiveRecallDrill: React.FC = () => {
         <div className="flex items-center gap-3 text-xs">
           <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
             <CheckCircle2 className="w-3.5 h-3.5" />
-            <span>{masteredCount} {language === 'ta' ? 'தேர்ச்சி' : 'Mastered'}</span>
+            <span>{masteredCount} Mastered</span>
           </div>
           <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-amber-500/10 text-amber-400 border border-amber-500/20">
             <RotateCw className="w-3.5 h-3.5" />
-            <span>{reviewCount} {language === 'ta' ? 'மீள்பார்வை' : 'Need Review'}</span>
+            <span>{reviewCount} Need Review</span>
           </div>
         </div>
       </div>
@@ -296,23 +294,21 @@ export const ActiveRecallDrill: React.FC = () => {
             <Zap className="w-8 h-8" />
           </div>
           <h2 className="text-2xl font-bold text-white mb-2">
-            {language === 'ta' ? '60 வினாடி மின்னல் சவால்!' : '60-Second Blitz Challenge!'}
+            60-Second Blitz Challenge!
           </h2>
           <p className="text-sm text-slate-300 mb-6">
-            {language === 'ta'
-              ? '60 வினாடிகளில் எத்தனை கேள்விகளுக்கு சரியான விடையை நினைவு கூர்கிறீர்கள் என்று சோதித்துப் பாருங்கள்!'
-              : 'Race against the clock! Recall as many concepts as you can in 60 seconds and rack up XP bonuses.'}
+            Race against the clock! Recall as many concepts as you can in 60 seconds and rack up XP bonuses.
           </p>
 
           <div className="grid grid-cols-2 gap-4 max-w-sm mx-auto mb-8 text-left">
             <div className="p-3 rounded-xl bg-slate-800/80 border border-slate-700/60">
-              <span className="text-xs text-slate-400 block">{language === 'ta' ? 'நேரம்' : 'Duration'}</span>
+              <span className="text-xs text-slate-400 block">Duration</span>
               <span className="text-lg font-bold text-amber-400 flex items-center gap-1">
                 <Timer className="w-4 h-4" /> 60 seconds
               </span>
             </div>
             <div className="p-3 rounded-xl bg-slate-800/80 border border-slate-700/60">
-              <span className="text-xs text-slate-400 block">{language === 'ta' ? 'வெற்றி பரிசு' : 'Reward'}</span>
+              <span className="text-xs text-slate-400 block">Reward</span>
               <span className="text-lg font-bold text-violet-400 flex items-center gap-1">
                 <Award className="w-4 h-4" /> +50 XP Bonus
               </span>
@@ -324,7 +320,7 @@ export const ActiveRecallDrill: React.FC = () => {
             className="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-slate-950 font-bold text-base shadow-lg shadow-amber-500/25 transition-all flex items-center justify-center gap-2"
           >
             <Flame className="w-5 h-5 fill-slate-950" />
-            <span>{language === 'ta' ? 'சவாலைத் தொடங்கு' : 'Start Blitz Now'}</span>
+            <span>Start Blitz Now</span>
           </button>
         </div>
       ) : mode === 'blitz' && blitzCompleted ? (
@@ -334,16 +330,16 @@ export const ActiveRecallDrill: React.FC = () => {
             <Sparkles className="w-8 h-8" />
           </div>
           <h2 className="text-2xl font-bold text-white mb-1">
-            {language === 'ta' ? 'அருமை! நேரம் முடிந்தது!' : 'Fantastic Blitz Round!'}
+            Fantastic Blitz Round!
           </h2>
           <p className="text-sm text-slate-300 mb-6">
-            {language === 'ta' ? 'உங்கள் வேகமான நினைவுத்திறன் முடிவு:' : 'Here is how you performed under pressure:'}
+            Here is how you performed under pressure:
           </p>
 
           <div className="p-6 rounded-2xl bg-gradient-to-b from-slate-800/80 to-slate-950 border border-slate-700 max-w-sm mx-auto mb-8">
             <span className="text-4xl font-extrabold text-amber-400">{blitzScore}</span>
             <span className="text-xs text-slate-400 block mt-1 uppercase tracking-wider font-semibold">
-              {language === 'ta' ? 'சரியாக நினைவுகூர்ந்தவை' : 'Concepts Recalled Correctly'}
+              Concepts Recalled Correctly
             </span>
             <div className="mt-4 pt-4 border-t border-slate-700/60 flex justify-between text-xs text-slate-300">
               <span>XP Earned</span>
@@ -357,13 +353,13 @@ export const ActiveRecallDrill: React.FC = () => {
               className="py-3 px-6 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-sm transition-all flex items-center justify-center gap-2"
             >
               <RefreshCw className="w-4 h-4" />
-              <span>{language === 'ta' ? 'மீண்டும் விளையாடு' : 'Play Blitz Again'}</span>
+              <span>Play Blitz Again</span>
             </button>
             <button
               onClick={() => { setMode('spaced'); setBlitzCompleted(false); }}
               className="py-3 px-6 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-sm transition-all border border-slate-700"
             >
-              <span>{language === 'ta' ? 'வழக்கமான பயிற்சிக்குச் செல்' : 'Switch to Spaced Deck'}</span>
+              <span>Switch to Spaced Deck</span>
             </button>
           </div>
         </div>
@@ -417,8 +413,8 @@ export const ActiveRecallDrill: React.FC = () => {
                   : 'bg-slate-800 text-slate-400 border border-slate-700'
               }`}>
                 {isFlipped
-                  ? (language === 'ta' ? 'விளக்கம் / பதில்' : 'Back • Answer & Breakdown')
-                  : (language === 'ta' ? 'கேள்வி / கருத்து' : 'Front • Prompt & Question')}
+                  ? 'Back • Answer & Breakdown'
+                  : 'Front • Prompt & Question'}
               </span>
 
               <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
@@ -430,7 +426,7 @@ export const ActiveRecallDrill: React.FC = () => {
                   <Volume2 className="w-4 h-4" />
                 </button>
                 <span className="text-[11px] text-slate-500 hidden sm:inline">
-                  {language === 'ta' ? 'தட்டவும்: திருப்ப' : 'Click card to flip'}
+                  Click card to flip
                 </span>
               </div>
             </div>
@@ -456,19 +452,19 @@ export const ActiveRecallDrill: React.FC = () => {
                 }}
                 className="hover:text-violet-400 flex items-center gap-1 transition-colors"
               >
-                <span>{language === 'ta' ? 'பாடத்திற்குச் செல்' : 'Go to Lesson'}</span>
+                <span>Go to Lesson</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
 
               <span className="text-[11px] text-slate-500">
                 {cardStats[currentCard.id] === 'mastered' && (
                   <span className="text-emerald-400 font-semibold flex items-center gap-1">
-                    <CheckCircle2 className="w-3.5 h-3.5" /> {language === 'ta' ? 'தேர்ச்சி பெறப்பட்டது' : 'Mastered'}
+                    <CheckCircle2 className="w-3.5 h-3.5" /> Mastered
                   </span>
                 )}
                 {cardStats[currentCard.id] === 'review' && (
                   <span className="text-amber-400 font-semibold flex items-center gap-1">
-                    <RotateCw className="w-3.5 h-3.5" /> {language === 'ta' ? 'மீள்பார்வை தேவை' : 'Needs Review'}
+                    <RotateCw className="w-3.5 h-3.5" /> Needs Review
                   </span>
                 )}
               </span>
@@ -491,7 +487,7 @@ export const ActiveRecallDrill: React.FC = () => {
                 className="px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-300 text-xs font-semibold flex items-center gap-2 transition-colors"
               >
                 <RotateCw className="w-3.5 h-3.5" />
-                <span>{language === 'ta' ? 'திருப்புக' : 'Flip'}</span>
+                <span>Flip</span>
               </button>
               <button
                 onClick={handleNext}
@@ -509,7 +505,7 @@ export const ActiveRecallDrill: React.FC = () => {
                 className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-bold transition-all active:scale-95"
               >
                 <XCircle className="w-4 h-4 text-amber-400" />
-                <span>{language === 'ta' ? 'கடினம் / மீள்பார்வை' : 'Need Review'}</span>
+                <span>Need Review</span>
               </button>
 
               <button
@@ -517,7 +513,7 @@ export const ActiveRecallDrill: React.FC = () => {
                 className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-200 border border-emerald-500/40 text-xs font-bold transition-all active:scale-95 shadow-md shadow-emerald-950/20"
               >
                 <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                <span>{language === 'ta' ? 'தெரிந்தது! (+10 XP)' : 'Mastered! (+10 XP)'}</span>
+                <span>Mastered! (+10 XP)</span>
               </button>
             </div>
           </div>

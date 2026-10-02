@@ -246,7 +246,7 @@ btn.onclick = () => {
 ];
 
 export const PracticeStudio: React.FC = () => {
-  const { language, t, triggerConfetti } = useLearning();
+  const { t, triggerConfetti } = useLearning();
   const [activeTool, setActiveTool] = useState<PracticeTool>('web');
 
   // 1. Web Dev State
@@ -554,12 +554,10 @@ export const PracticeStudio: React.FC = () => {
             <span>Practical Skills Sandbox</span>
           </div>
           <h1 className="mt-2 font-heading text-2xl sm:text-3xl font-black text-white">
-            {language === 'ta' ? 'செய்முறைப் பயிற்சி மையம்' : 'Category Practice Studio'}
+            Category Practice Studio
           </h1>
           <p className="mt-1 text-xs sm:text-sm text-slate-400">
-            {language === 'ta'
-              ? 'நிரல் எழுதுதல், AI பிராம்ட் ஆய்வு, பேச்சுப் பயிற்சி மற்றும் ரெஸ்யூம் சோதனைகளுக்கான நேரடி ஆய்வகம்.'
-              : 'Interactive execution sandboxes tailored to Web Development, AI Prompting, Spoken English, and Placement Preparation.'}
+            Interactive execution sandboxes tailored to Web Development, AI Prompting, Spoken English, and Placement Preparation.
           </p>
         </div>
 

@@ -177,23 +177,16 @@ export const LearningProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     return () => unsubscribe();
   }, []);
 
-  const language = userState.language || 'en';
+  const language = 'en';
 
-  const setLanguage = (lang: Language) => {
-    setUserState(prev => {
-      const newBadges = [...prev.earnedBadgeIds];
-      if (lang === 'ta' && !newBadges.includes('badge-bilingual-learner')) {
-        newBadges.push('badge-bilingual-learner');
-        confetti({ particleCount: 50, spread: 60, origin: { y: 0.8 } });
-      }
-      return { ...prev, language: lang, earnedBadgeIds: newBadges };
-    });
+  const setLanguage = (_lang: Language) => {
+    // English-only mode is permanently enabled
   };
 
   const t = (text?: BilingualText | string): string => {
     if (!text) return '';
     if (typeof text === 'string') return text;
-    return text[language] || text.en || '';
+    return text.en || '';
   };
 
   const allCourses = INITIAL_COURSES;

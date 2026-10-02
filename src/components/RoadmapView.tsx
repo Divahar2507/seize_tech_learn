@@ -18,7 +18,6 @@ import { ROADMAP_TRACKS } from '../data/roadmapsData';
 
 export const RoadmapView: React.FC = () => {
   const { 
-    language, 
     t, 
     userState, 
     setActiveCourseAndLesson, 
@@ -46,21 +45,15 @@ export const RoadmapView: React.FC = () => {
         <div className="max-w-3xl">
           <div className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/30 bg-amber-400/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-amber-300">
             <Milestone className="h-3.5 w-3.5" />
-            <span>{language === 'ta' ? 'தொழில் வழிகாட்டி வரைபடம்' : 'Career Skill Roadmaps'}</span>
+            <span>Career Skill Roadmaps</span>
           </div>
 
           <h1 className="mt-3 font-heading text-3xl sm:text-5xl font-black text-white leading-tight">
-            {language === 'ta' ? (
-              <>இலக்கை அறிந்து, தெளிவான பாதையைப் பின்பற்றுங்கள்.</>
-            ) : (
-              <>Discover a goal. Follow the step-by-step roadmap.</>
-            )}
+            Discover a goal. Follow the step-by-step roadmap.
           </h1>
 
           <p className="mt-3 text-sm sm:text-base text-slate-300 leading-relaxed">
-            {language === 'ta'
-              ? 'எந்த திறனை முதலில் கற்பது என்று குழப்பம் வேண்டாம். தொடக்க நிலை முதல் பணி வாய்ப்பு வரை படிப்படியான வழிகாட்டிகள்.'
-              : 'Never wonder what skill to learn next. Follow structured weekly milestones designed to take you directly into job readiness.'}
+            Never wonder what skill to learn next. Follow structured weekly milestones designed to take you directly into job readiness.
           </p>
         </div>
       </div>
@@ -89,7 +82,7 @@ export const RoadmapView: React.FC = () => {
                   {t(track.title)}
                 </h4>
                 <p className="mt-1 text-xs text-slate-400">
-                  {track.totalWeeks} {language === 'ta' ? 'வாரங்கள்' : 'weeks'} · {track.nodes.length} {language === 'ta' ? 'படிகள்' : 'steps'}
+                  {track.totalWeeks} weeks · {track.nodes.length} steps
                 </p>
               </div>
             </button>
@@ -114,7 +107,7 @@ export const RoadmapView: React.FC = () => {
           <div className="rounded-xl border border-slate-800 bg-slate-950/80 p-4">
             <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-amber-400 mb-2">
               <Briefcase className="h-3.5 w-3.5" />
-              <span>{language === 'ta' ? 'பொருத்தமான வேலைகள்' : 'Target Career Roles'}</span>
+              <span>Target Career Roles</span>
             </div>
             <div className="flex flex-wrap gap-1.5">
               {selectedTrack.careerRoles.map((role, i) => (
@@ -183,7 +176,7 @@ export const RoadmapView: React.FC = () => {
                         }}
                         className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-300 hover:text-white transition"
                       >
-                        <span>{language === 'ta' ? 'பாடத்தை கற்க' : 'Jump to Lesson'}</span>
+                        <span>Jump to Lesson</span>
                         <ArrowRight className="h-3.5 w-3.5" />
                       </button>
                     )}

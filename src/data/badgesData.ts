@@ -54,16 +54,16 @@ export const ALL_BADGES: Badge[] = [
     category: 'project'
   },
   {
-    id: 'badge-bilingual-learner',
+    id: 'badge-curious-explorer',
     title: {
-      en: 'Dual-Tongue Scholar',
-      ta: 'இருமொழி அறிஞர்'
+      en: 'Curious Explorer',
+      ta: 'ஆர்வமுள்ள ஆராய்ச்சியாளர்'
     },
     description: {
-      en: 'Explored lessons in both English and Tamil.',
-      ta: 'ஆங்கிலம் மற்றும் தமிழ் ஆகிய இரு மொழிகளிலும் பாடங்களை கற்றறிந்தீர்கள்.'
+      en: 'Explored interactive coding labs and skill sandboxes.',
+      ta: 'செய்முறை ஆய்வகங்கள் மற்றும் திறன் பயிற்சிகளை ஆராய்ந்தீர்கள்.'
     },
-    icon: '🌐',
+    icon: '🔬',
     category: 'completion'
   }
 ];

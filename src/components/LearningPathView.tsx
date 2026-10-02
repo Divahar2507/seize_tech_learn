@@ -19,7 +19,6 @@ import { useLearning } from '../context/LearningContext';
 
 export const LearningPathView: React.FC = () => {
   const { 
-    language, 
     t, 
     activeCourse, 
     userState, 
@@ -47,7 +46,7 @@ export const LearningPathView: React.FC = () => {
           className="inline-flex items-center gap-1 text-xs font-semibold text-slate-400 hover:text-white transition"
         >
           <ArrowLeft className="h-4 w-4" />
-          <span>{language === 'ta' ? 'முகப்பிற்குத் திரும்பு' : 'Back to Home'}</span>
+          <span>Back to Home</span>
         </button>
         <span className="text-slate-600">/</span>
         <span className="text-xs font-bold text-violet-400">{activeCourse.category}</span>
@@ -70,7 +69,7 @@ export const LearningPathView: React.FC = () => {
             <div className="mt-6 flex flex-wrap items-center gap-4 text-xs text-slate-400">
               <div className="flex items-center gap-1.5">
                 <Clock className="h-4 w-4 text-violet-400" />
-                <span>{activeCourse.estimatedHours} {language === 'ta' ? 'மணிநேரம்' : 'hours'}</span>
+                <span>{activeCourse.estimatedHours} hours</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <Sparkles className="h-4 w-4 text-amber-400" />
@@ -78,7 +77,7 @@ export const LearningPathView: React.FC = () => {
               </div>
               <div className="flex items-center gap-1.5">
                 <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
-                <span>{activeCourse.rating} ({activeCourse.reviewCount} {language === 'ta' ? 'மதிப்பீடுகள்' : 'reviews'})</span>
+                <span>{activeCourse.rating} ({activeCourse.reviewCount} reviews)</span>
               </div>
             </div>
           </div>
@@ -86,13 +85,13 @@ export const LearningPathView: React.FC = () => {
           {/* Quick Progress Box */}
           <div className="rounded-2xl border border-slate-800 bg-slate-950/70 p-5 md:w-64 shrink-0 text-center">
             <div className="text-xs font-bold uppercase tracking-wider text-slate-400">
-              {language === 'ta' ? 'பாதை முன்னேற்றம்' : 'Path Progress'}
+              Path Progress
             </div>
             <div className="mt-2 font-heading text-3xl font-black text-cyan-300">
               {progress.percentage}%
             </div>
             <p className="mt-1 text-xs text-slate-400">
-              {progress.completedLessons} / {progress.totalLessons} {language === 'ta' ? 'பாடங்கள் முடிந்தது' : 'completed'}
+              {progress.completedLessons} / {progress.totalLessons} completed
             </p>
 
             <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-slate-800">
@@ -107,7 +106,7 @@ export const LearningPathView: React.FC = () => {
                 onClick={() => generateCertificate(activeCourse.id)}
                 className="mt-4 w-full rounded-xl bg-violet-600 py-2 text-xs font-bold text-white hover:bg-violet-500 transition shadow-md shadow-violet-600/30"
               >
-                {language === 'ta' ? 'சான்றிதழ் பெறுங்கள்' : 'Claim Certificate'}
+                Claim Certificate
               </button>
             )}
           </div>
@@ -116,7 +115,7 @@ export const LearningPathView: React.FC = () => {
         {/* 6-Step Visual Journey Ribbon */}
         <div className="mt-8 border-t border-slate-800 pt-6">
           <div className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">
-            {language === 'ta' ? 'கற்றல் பாதை அமைப்பு:' : 'The SeizeLearn 6-Step Journey:'}
+            The SeizeLearn 6-Step Journey:
           </div>
           <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-300">
             <span className="rounded-md bg-slate-800 px-2.5 py-1 text-white">1. Goal</span>
@@ -138,7 +137,7 @@ export const LearningPathView: React.FC = () => {
       <div className="rounded-2xl border border-slate-800 bg-slate-900/50 p-6">
         <h3 className="flex items-center gap-2 font-heading text-lg font-bold text-white">
           <Target className="h-5 w-5 text-violet-400" />
-          <span>{language === 'ta' ? 'நீங்கள் பெறும் முக்கிய திறன்கள்' : 'What You Will Learn & Build'}</span>
+          <span>What You Will Learn & Build</span>
         </h3>
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           {activeCourse.learningOutcomes.map((outcome, idx) => (
@@ -153,7 +152,7 @@ export const LearningPathView: React.FC = () => {
       {/* Modules & Lessons List */}
       <div className="space-y-6">
         <h3 className="font-heading text-xl font-bold text-white">
-          {language === 'ta' ? 'பாடப்பிரிவுகள் & தொகுதிகள்' : 'Curriculum Modules'}
+          Curriculum Modules
         </h3>
 
         {activeCourse.modules.map(module => (
@@ -217,7 +216,7 @@ export const LearningPathView: React.FC = () => {
             <div>
               <div className="inline-flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-cyan-400">
                 <Layers3 className="h-4 w-4" />
-                <span>{language === 'ta' ? 'முக்கிய போர்ட்ஃபோலியோ திட்டப்பணி' : 'Capstone Portfolio Project'}</span>
+                <span>Capstone Portfolio Project</span>
               </div>
               <h4 className="mt-2 font-heading text-xl font-bold text-white">
                 {t(capstoneProject.title)}
@@ -234,7 +233,7 @@ export const LearningPathView: React.FC = () => {
               }}
               className="inline-flex items-center gap-2 rounded-xl bg-cyan-400 px-5 py-2.5 text-xs font-bold text-slate-950 transition hover:bg-cyan-300 shrink-0"
             >
-              <span>{isCapstoneDone ? (language === 'ta' ? 'திட்டப்பணியை சரிபார்க்க' : 'View Submission') : (language === 'ta' ? 'திட்டப்பணியை தொடங்கு' : 'Start Project')}</span>
+              <span>{isCapstoneDone ? 'View Submission' : 'Start Project'}</span>
               <ArrowRight className="h-4 w-4" />
             </button>
           </div>

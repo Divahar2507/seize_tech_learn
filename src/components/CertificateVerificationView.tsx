@@ -18,7 +18,7 @@ import { useLearning } from '../context/LearningContext';
 
 export const CertificateVerificationView: React.FC = () => {
   const { certificateId } = useParams<{ certificateId: string }>();
-  const { language, t, findCertificateById } = useLearning();
+  const { t, findCertificateById } = useLearning();
   const [copied, setCopied] = useState(false);
 
   const cert = certificateId ? findCertificateById(certificateId) : undefined;
@@ -65,7 +65,7 @@ export const CertificateVerificationView: React.FC = () => {
           className="inline-flex items-center gap-2 rounded-xl border border-slate-800 bg-slate-900/80 px-4 py-2 text-xs font-semibold text-slate-300 hover:text-white hover:border-slate-700 transition"
         >
           <ArrowLeft className="h-4 w-4" />
-          <span>{language === 'ta' ? 'முகப்புக்குத் திரும்பு' : 'Back to Platform'}</span>
+          <span>Back to Platform</span>
         </Link>
 
         <div className="flex items-center gap-2">
@@ -79,7 +79,7 @@ export const CertificateVerificationView: React.FC = () => {
               <svg className="h-3.5 w-3.5 fill-current" viewBox="0 0 24 24">
                 <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.46 8.76a1.45 1.45 0 0 0 0-2.9 1.45 1.45 0 0 0 0 2.9m1.4 9.74v-8.37H5.06v8.37h2.8z"/>
               </svg>
-              <span>{language === 'ta' ? 'லிங்க்ட்இன்' : 'Add to LinkedIn'}</span>
+              <span>Add to LinkedIn</span>
               <ExternalLink className="h-3 w-3 opacity-80" />
             </a>
           )}
@@ -90,12 +90,12 @@ export const CertificateVerificationView: React.FC = () => {
             {copied ? (
               <>
                 <Check className="h-3.5 w-3.5 text-emerald-400" />
-                <span className="text-emerald-400 font-bold">{language === 'ta' ? 'நகலெடுக்கப்பட்டது!' : 'Copied!'}</span>
+                <span className="text-emerald-400 font-bold">Copied!</span>
               </>
             ) : (
               <>
                 <Copy className="h-3.5 w-3.5 text-slate-400" />
-                <span>{language === 'ta' ? 'இணைப்பு நகலெடு' : 'Copy Link'}</span>
+                <span>Copy Link</span>
               </>
             )}
           </button>
@@ -104,7 +104,7 @@ export const CertificateVerificationView: React.FC = () => {
             className="inline-flex items-center gap-1.5 rounded-xl bg-violet-600 px-3 py-2 text-xs font-semibold text-white hover:bg-violet-500 transition"
           >
             <Printer className="h-3.5 w-3.5" />
-            <span>{language === 'ta' ? 'அச்சிடு / PDF' : 'Print / PDF'}</span>
+            <span>Print / PDF</span>
           </button>
         </div>
       </div>
@@ -116,7 +116,7 @@ export const CertificateVerificationView: React.FC = () => {
             <div className="flex items-center gap-2.5 text-emerald-400">
               <ShieldCheck className="h-5 w-5" />
               <span className="text-xs font-bold uppercase tracking-wider">
-                {language === 'ta' ? 'அங்கீகரிக்கப்பட்ட டிஜிட்டல் சான்றிதழ்' : 'Verified Digital Credential'}
+                Verified Digital Credential
               </span>
             </div>
             <span className="rounded-full bg-emerald-500/20 px-3 py-1 text-[11px] font-mono font-bold text-emerald-300 border border-emerald-500/40">
@@ -141,15 +141,13 @@ export const CertificateVerificationView: React.FC = () => {
             {/* Recipient Block */}
             <div className="rounded-2xl border border-slate-800 bg-slate-950/60 p-6 text-center space-y-3">
               <span className="text-xs font-semibold text-slate-400 uppercase tracking-widest">
-                {language === 'ta' ? 'இந்த சான்றிதழ் பெருமையுடன் வழங்கப்படுகிறது' : 'This is to officially certify that'}
+                This is to officially certify that
               </span>
               <h1 className="font-heading text-2xl sm:text-3xl font-black text-white tracking-wide">
                 {cert.studentName}
               </h1>
               <p className="text-sm text-slate-300 max-w-xl mx-auto">
-                {language === 'ta'
-                  ? `வெற்றிகரமாக "${cert.courseTitle}" பாடத்திட்டத்தின் அனைத்து கட்டமைப்புத் திட்டங்களையும் செய்முறைப் பயிற்சிகளையும் முழுமையாக முடித்துள்ளார்.`
-                  : `has successfully completed the comprehensive curriculum and rigorous practical project milestones for "${cert.courseTitle}".`}
+                has successfully completed the comprehensive curriculum and rigorous practical project milestones for "{cert.courseTitle}".
               </p>
             </div>
 
@@ -177,7 +175,7 @@ export const CertificateVerificationView: React.FC = () => {
             {cert.skills && cert.skills.length > 0 && (
               <div className="space-y-2">
                 <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-                  {language === 'ta' ? 'சரிபார்க்கப்பட்ட தொழில் திறன்கள்' : 'Skills & Technologies Verified'}
+                  Skills & Technologies Verified
                 </span>
                 <div className="flex flex-wrap gap-2">
                   {cert.skills.map((skill, i) => (
@@ -198,12 +196,10 @@ export const CertificateVerificationView: React.FC = () => {
                 <div>
                   <h4 className="font-heading text-sm font-bold text-white flex items-center gap-2">
                     <Award className="h-4 w-4 text-cyan-400" />
-                    <span>{language === 'ta' ? 'சான்றிதழை உங்கள் சமூக வலைப்பின்னலில் பகிருங்கள்' : 'Broadcast & Showcase Credential'}</span>
+                    <span>Broadcast & Showcase Credential</span>
                   </h4>
                   <p className="text-xs text-slate-400">
-                    {language === 'ta'
-                      ? 'உங்கள் தொழில்முறை சுயவிவரத்தில் இந்த சான்றிதழைச் சேர்த்து நிறுவனங்களின் கவனத்தை ஈர்க்கவும்.'
-                      : 'Sync directly to your professional profile or share public proof with recruiters.'}
+                    Sync directly to your professional profile or share public proof with recruiters.
                   </p>
                 </div>
                 <span className="text-[11px] font-mono text-emerald-400 flex items-center gap-1 self-start sm:self-center">
@@ -222,7 +218,7 @@ export const CertificateVerificationView: React.FC = () => {
                   <svg className="h-3.5 w-3.5 fill-current" viewBox="0 0 24 24">
                     <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.46 8.76a1.45 1.45 0 0 0 0-2.9 1.45 1.45 0 0 0 0 2.9m1.4 9.74v-8.37H5.06v8.37h2.8z"/>
                   </svg>
-                  <span>{language === 'ta' ? 'லிங்க்ட்இனில் சேர்க்க' : 'Add to LinkedIn Profile'}</span>
+                  <span>Add to LinkedIn Profile</span>
                   <ExternalLink className="h-3 w-3 opacity-80" />
                 </a>
 
@@ -268,19 +264,17 @@ export const CertificateVerificationView: React.FC = () => {
             <Award className="h-7 w-7" />
           </div>
           <h2 className="text-xl font-bold text-white">
-            {language === 'ta' ? 'சான்றிதழ் கிடைக்கவில்லை' : 'Credential Not Found in Local Cache'}
+            Credential Not Found in Local Cache
           </h2>
           <p className="text-xs sm:text-sm text-slate-400 max-w-md mx-auto">
-            {language === 'ta'
-              ? 'கோரப்பட்ட சான்றிதழ் எண் உங்கள் கணினியில் பதிவு செய்யப்படவில்லை அல்லது தவறாக உள்ளது.'
-              : 'The requested credential identifier was not found in your session. Complete course requirements to issue this credential.'}
+            The requested credential identifier was not found in your session. Complete course requirements to issue this credential.
           </p>
           <Link
             to="/"
             className="inline-flex items-center gap-2 rounded-xl bg-violet-600 px-5 py-2.5 text-xs font-bold text-white hover:bg-violet-500 transition"
           >
             <Sparkles className="h-4 w-4" />
-            <span>{language === 'ta' ? 'பாடத்திட்டங்களை ஆராய்க' : 'Explore Courses'}</span>
+            <span>Explore Courses</span>
           </Link>
         </div>
       )}
