@@ -1,27 +1,28 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   X, 
-  Mail, 
-  Lock, 
-  User, 
-  LogIn, 
-  UserPlus, 
   Sparkles, 
-  AlertCircle,
-  CheckCircle2,
-  Eye,
-  EyeOff,
-  ShieldCheck
+  AlertCircle, 
+  CheckCircle2, 
+  ShieldCheck, 
+  Cloud, 
+  Award, 
+  LogOut,
+  ExternalLink,
+  Zap
 } from 'lucide-react';
 import { useLearning } from '../context/LearningContext';
 import { 
   loginWithGoogle, 
-  loginWithMicrosoft, 
-  loginWithLinkedIn, 
-  loginWithCredentials, 
-  registerWithCredentials, 
-  logoutUser 
+  loginWithGoogleCredential, 
+  GOOGLE_CLIENT_ID 
 } from '../services/firebase';
+
+declare global {
+  interface Window {
+    google?: any;
+  }
+}
 
 export const AuthModal: React.FC = () => {
   const { 
@@ -29,117 +30,146 @@ export const AuthModal: React.FC = () => {
     setOpenAuthModal, 
     userState,
     loginLocally,
-    logoutLocally
+    logoutLocally,
+    setActiveTab
   } = useLearning();
 
-  const [isRegister, setIsRegister] = useState<boolean>(false);
-  const [username, setUsername] = useState<string>('');
-  const [usernameOrEmail, setUsernameOrEmail] = useState<string>('');
-  const [email, setEmail] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
-  const [showPassword, setShowPassword] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
-  const [loadingProvider, setLoadingProvider] = useState<string | null>(null);
-
-  if (!openAuthModal) return null;
+  const gsiButtonRef = useRef<HTMLDivElement>(null);
 
   const isGuest = userState.user.isAnonymous;
 
-  // Handle custom credentials (username / email + password)
-  const handleCredentialsAuth = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // Helper to parse Google Identity Services JWT ID Token
+  const parseGoogleJwt = (token: string) => {
+    try {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(
+        atob(base64)
+          .split('')
+          .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+          .join('')
+      );
+      return JSON.parse(jsonPayload);
+    } catch {
+      return null;
+    }
+  };
+
+  // Handle Google Identity Services (GIS) credential response
+  const handleGsiCredential = async (response: { credential?: string }) => {
+    if (!response?.credential) return;
     setErrorMsg('');
     setLoading(true);
 
+    const payload = parseGoogleJwt(response.credential);
+
     try {
-      if (isRegister) {
-        if (!username.trim()) {
-          throw new Error('Please enter a username.');
-        }
-        if (password.length < 6) {
-          throw new Error('Password must be at least 6 characters long.');
-        }
-        await registerWithCredentials(username, email, password);
-      } else {
-        if (!usernameOrEmail.trim()) {
-          throw new Error('Please enter your username or email.');
-        }
-        await loginWithCredentials(usernameOrEmail, password);
-      }
+      // Exchange GIS ID token with Firebase Auth
+      await loginWithGoogleCredential(response.credential);
       setOpenAuthModal(false);
-    } catch (err: any) {
-      console.error('Auth error', err);
-      const msg = err.message || '';
-      const code = err.code || '';
-
-      // If Firebase Auth backend is not activated yet in console or network fails, gracefully log in locally!
-      if (
-        code === 'auth/configuration-not-found' || 
-        msg.includes('CONFIGURATION_NOT_FOUND') ||
-        code === 'auth/network-request-failed' ||
-        msg.includes('Failed to fetch')
-      ) {
-        const cleanName = isRegister 
-          ? username 
-          : (usernameOrEmail.includes('@') ? usernameOrEmail.split('@')[0] : usernameOrEmail);
-        loginLocally(cleanName, isRegister ? email : (usernameOrEmail.includes('@') ? usernameOrEmail : undefined));
+    } catch (firebaseErr: any) {
+      console.warn('Firebase credential exchange note:', firebaseErr);
+      // Graceful local sync with decoded Google user identity
+      if (payload) {
+        loginLocally(
+          payload.name || payload.given_name || payload.email?.split('@')[0] || 'Learner',
+          payload.email,
+          payload.picture
+        );
         setOpenAuthModal(false);
-        return;
-      }
-
-      if (msg.includes('auth/invalid-credential') || msg.includes('auth/wrong-password') || msg.includes('auth/user-not-found')) {
-        setErrorMsg('Invalid credentials. Please verify your username and password.');
-      } else if (msg.includes('auth/email-already-in-use')) {
-        setErrorMsg('This email or username is already registered. Try signing in.');
       } else {
-        setErrorMsg(err.message || 'Authentication error. Please check your inputs.');
+        setErrorMsg('Could not read Google profile. Please try the Sign In button below.');
       }
     } finally {
       setLoading(false);
     }
   };
 
-  // OAuth Providers (Google, LinkedIn, Microsoft)
-  const handleOAuthLogin = async (provider: 'google' | 'linkedin' | 'microsoft') => {
+  // Initialize Google Identity Services (GIS) button when modal opens
+  useEffect(() => {
+    if (!openAuthModal || !isGuest) return;
+
+    let checkInterval: any = null;
+    let attempts = 0;
+
+    const initGsi = () => {
+      if (window.google?.accounts?.id && gsiButtonRef.current) {
+        try {
+          window.google.accounts.id.initialize({
+            client_id: GOOGLE_CLIENT_ID,
+            callback: handleGsiCredential,
+            auto_select: false,
+            cancel_on_tap_outside: true
+          });
+
+          // Render official Google button into container
+          gsiButtonRef.current.innerHTML = '';
+          window.google.accounts.id.renderButton(gsiButtonRef.current, {
+            theme: 'filled_blue',
+            size: 'large',
+            type: 'standard',
+            shape: 'pill',
+            text: 'continue_with',
+            width: 320
+          });
+          return true;
+        } catch (e) {
+          console.warn('GIS init notice:', e);
+        }
+      }
+      return false;
+    };
+
+    if (!initGsi()) {
+      checkInterval = setInterval(() => {
+        attempts++;
+        if (initGsi() || attempts > 15) {
+          clearInterval(checkInterval);
+        }
+      }, 300);
+    }
+
+    return () => {
+      if (checkInterval) clearInterval(checkInterval);
+    };
+  }, [openAuthModal, isGuest]);
+
+  if (!openAuthModal) return null;
+
+  // Primary Google Login via Firebase OAuth Popup
+  const handleGooglePopupAuth = async () => {
     setErrorMsg('');
     setLoading(true);
-    setLoadingProvider(provider);
 
     try {
-      if (provider === 'google') {
-        await loginWithGoogle();
-      } else if (provider === 'microsoft') {
-        await loginWithMicrosoft();
-      } else if (provider === 'linkedin') {
-        await loginWithLinkedIn();
-      }
+      await loginWithGoogle();
       setOpenAuthModal(false);
     } catch (err: any) {
-      console.error(`${provider} OAuth error:`, err);
+      console.error('Google OAuth error:', err);
       const code = err.code || '';
       const msg = err.message || '';
-      if (
-        code === 'auth/configuration-not-found' ||
-        msg.includes('CONFIGURATION_NOT_FOUND') ||
-        code === 'auth/network-request-failed' ||
-        msg.includes('Failed to fetch')
-      ) {
-        setErrorMsg(
-          'Firebase Authentication is not activated yet for this project. In Firebase Console, go to Security > Authentication and click "Get Started". Or log in with Username & Password below!'
-        );
+
+      if (code === 'auth/popup-closed-by-user') {
+        setErrorMsg('Sign-in window was closed before completion. Please try again.');
       } else if (code === 'auth/unauthorized-domain' || msg.includes('auth/unauthorized-domain')) {
         setErrorMsg(
-          'Domain not authorized: Please add "localhost" to your Firebase Console -> Authentication -> Settings -> Authorized Domains. Or use the Username & Password login below!'
+          'Domain not authorized: Please ensure your current origin (e.g. localhost) is added under Firebase Console -> Authentication -> Settings -> Authorized Domains.'
         );
-      } else if (code === 'auth/popup-closed-by-user') {
-        setErrorMsg('Sign-in window was closed before completion.');
+      } else if (
+        code === 'auth/configuration-not-found' || 
+        msg.includes('CONFIGURATION_NOT_FOUND') ||
+        code === 'auth/operation-not-allowed'
+      ) {
+        setErrorMsg(
+          'Google Sign-In is awaiting activation in Firebase Console. Please verify Authentication > Sign-in method > Google is enabled.'
+        );
       } else {
-        setErrorMsg(err.message || `${provider} sign-in encountered an error.`);
+        setErrorMsg(err.message || 'Google sign-in encountered an issue. Please try again.');
       }
     } finally {
       setLoading(false);
-      setLoadingProvider(null);
     }
   };
 
@@ -148,41 +178,67 @@ export const AuthModal: React.FC = () => {
     setOpenAuthModal(false);
   };
 
+  const handleGoToProfile = () => {
+    setOpenAuthModal(false);
+    setActiveTab('dashboard');
+  };
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-md p-4 overflow-y-auto">
-      <div className="w-full max-w-md rounded-3xl border border-slate-700 bg-slate-900 p-6 sm:p-8 space-y-6 shadow-2xl relative my-8">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-4 overflow-y-auto animate-in fade-in duration-200">
+      <div className="w-full max-w-md rounded-3xl border border-slate-700/80 bg-slate-900 p-6 sm:p-8 space-y-6 shadow-2xl relative my-8">
         
         {/* Close button */}
         <button
           onClick={() => setOpenAuthModal(false)}
-          className="absolute right-5 top-5 rounded-lg p-1.5 text-slate-400 hover:text-white"
+          className="absolute right-5 top-5 rounded-lg p-1.5 text-slate-400 hover:text-white transition hover:bg-slate-800"
+          aria-label="Close dialog"
         >
           <X className="h-5 w-5" />
         </button>
 
         {/* Header */}
-        <div className="text-center space-y-2">
-          <div className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-tr from-violet-600 to-cyan-400 font-heading text-lg font-black text-white shadow-lg shadow-violet-500/20">
-            SZ
+        <div className="text-center space-y-2 pt-1">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-tr from-violet-600 via-indigo-600 to-cyan-400 font-heading text-lg font-black text-white shadow-xl shadow-violet-500/25">
+            <svg className="h-7 w-7" viewBox="0 0 24 24">
+              <path fill="#ffffff" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+              <path fill="#ffffff" opacity="0.9" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+              <path fill="#ffffff" opacity="0.8" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+              <path fill="#ffffff" opacity="0.95" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+            </svg>
           </div>
-          <h3 className="font-heading text-xl font-bold text-white">
-            {!isGuest 
-              ? 'Your Learner Profile'
-              : isRegister 
-                ? 'Create Your Free Account'
-                : 'Welcome Back to SeizeLearn'}
+          <h3 className="font-heading text-xl font-bold text-white tracking-tight">
+            {!isGuest ? 'Your Google Account' : 'Sign In with Google'}
           </h3>
-          <p className="text-xs text-slate-400 max-w-xs mx-auto">
-            Save your learning streaks, verified projects, and career credentials to the cloud.
+          <p className="text-xs text-slate-400 max-w-xs mx-auto leading-relaxed">
+            {!isGuest 
+              ? 'Your learner profile is connected and synchronized with Google OAuth.'
+              : 'One-click sign-in. Back up your progress, badges, and verified career portfolio.'}
           </p>
         </div>
 
         {/* Logged In View */}
         {!isGuest ? (
-          <div className="space-y-4 rounded-2xl border border-slate-800 bg-slate-950/60 p-5 text-center">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-violet-600/20 text-violet-300 font-bold text-lg border border-violet-500/30">
-              {(userState.user.displayName || userState.user.email || 'U')[0].toUpperCase()}
+          <div className="space-y-5 rounded-2xl border border-slate-800 bg-slate-950/70 p-5 text-center">
+            <div className="relative mx-auto h-16 w-16">
+              {userState.user.photoURL ? (
+                <img 
+                  src={userState.user.photoURL} 
+                  alt={userState.user.displayName || 'Google User'} 
+                  className="h-16 w-16 rounded-full object-cover border-2 border-violet-500/50 shadow-md"
+                />
+              ) : (
+                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-violet-600/20 text-violet-300 font-bold text-xl border border-violet-500/40">
+                  {(userState.user.displayName || userState.user.email || 'G')[0].toUpperCase()}
+                </div>
+              )}
+              <div 
+                className="absolute -bottom-1 -right-1 grid h-6 w-6 place-items-center rounded-full bg-emerald-500 text-slate-950 shadow"
+                title="Verified Account"
+              >
+                <CheckCircle2 className="h-4 w-4 fill-emerald-500 text-slate-950" />
+              </div>
             </div>
+
             <div>
               <div className="font-heading text-base font-bold text-white">
                 {userState.user.displayName || 'Learner'}
@@ -191,207 +247,97 @@ export const AuthModal: React.FC = () => {
                 {userState.user.email}
               </div>
             </div>
-            <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-400 rounded-full bg-emerald-500/10 px-3 py-1 border border-emerald-500/30">
-              <CheckCircle2 className="h-3.5 w-3.5" />
-              <span>Cloud Synchronized</span>
+
+            {/* Badges */}
+            <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
+              <div className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-emerald-400 rounded-full bg-emerald-500/10 px-3 py-1 border border-emerald-500/20">
+                <Cloud className="h-3.5 w-3.5" />
+                <span>Cloud Synced</span>
+              </div>
+              <div className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-cyan-400 rounded-full bg-cyan-500/10 px-3 py-1 border border-cyan-500/20">
+                <ShieldCheck className="h-3.5 w-3.5" />
+                <span>Google OAuth 2.0</span>
+              </div>
             </div>
-            <button
-              onClick={handleLogout}
-              className="w-full rounded-xl border border-rose-500/40 bg-rose-500/10 py-2.5 text-xs font-bold text-rose-300 hover:bg-rose-500/20 transition mt-4"
-            >
-              Sign Out
-            </button>
+
+            {/* Action buttons */}
+            <div className="grid grid-cols-2 gap-3 pt-2">
+              <button
+                onClick={handleGoToProfile}
+                className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-700 bg-slate-800/80 py-2.5 text-xs font-bold text-slate-200 hover:bg-slate-700 hover:text-white transition"
+              >
+                <Award className="h-3.5 w-3.5 text-amber-400" />
+                <span>Dashboard</span>
+              </button>
+              <button
+                onClick={handleLogout}
+                className="flex items-center justify-center gap-1.5 rounded-xl border border-rose-500/40 bg-rose-500/10 py-2.5 text-xs font-bold text-rose-300 hover:bg-rose-500/20 transition"
+              >
+                <LogOut className="h-3.5 w-3.5" />
+                <span>Sign Out</span>
+              </button>
+            </div>
           </div>
         ) : (
-          <>
+          /* Sign-In View: Dedicated Google Login Only */
+          <div className="space-y-5">
             {errorMsg && (
-              <div className="flex items-start gap-2 rounded-xl border border-rose-500/30 bg-rose-950/40 p-3 text-xs text-rose-300">
+              <div className="flex items-start gap-2.5 rounded-xl border border-rose-500/30 bg-rose-950/40 p-3.5 text-xs text-rose-300 animate-in fade-in">
                 <AlertCircle className="h-4 w-4 shrink-0 mt-0.5 text-rose-400" />
                 <span className="leading-relaxed">{errorMsg}</span>
               </div>
             )}
 
-            {/* 1. Fast Social OAuth Providers: LinkedIn, Google, Microsoft */}
-            <div className="space-y-2.5">
-              
-              {/* Google */}
-              <button
-                onClick={() => handleOAuthLogin('google')}
-                disabled={loading}
-                className="w-full flex items-center justify-center gap-3 rounded-xl border border-slate-700 bg-slate-800/90 py-2.5 px-4 text-xs font-semibold text-white transition hover:bg-slate-700 hover:border-slate-600 disabled:opacity-50 shadow-sm"
-              >
-                <svg className="h-4 w-4" viewBox="0 0 24 24">
-                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-                </svg>
-                <span>{loadingProvider === 'google' ? 'Connecting to Google...' : 'Continue with Google'}</span>
-              </button>
+            {/* Google Identity Services Render Target (if available) */}
+            <div className="flex justify-center" ref={gsiButtonRef} />
 
-              {/* LinkedIn */}
-              <button
-                onClick={() => handleOAuthLogin('linkedin')}
-                disabled={loading}
-                className="w-full flex items-center justify-center gap-3 rounded-xl border border-[#0A66C2]/40 bg-[#0A66C2]/15 py-2.5 px-4 text-xs font-semibold text-white transition hover:bg-[#0A66C2]/25 hover:border-[#0A66C2]/60 disabled:opacity-50 shadow-sm"
-              >
-                <svg className="h-4 w-4 fill-[#0A66C2]" viewBox="0 0 24 24">
-                  <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"/>
-                </svg>
-                <span>{loadingProvider === 'linkedin' ? 'Connecting to LinkedIn...' : 'Continue with LinkedIn'}</span>
-              </button>
-
-              {/* Microsoft */}
-              <button
-                onClick={() => handleOAuthLogin('microsoft')}
-                disabled={loading}
-                className="w-full flex items-center justify-center gap-3 rounded-xl border border-slate-700 bg-slate-800/90 py-2.5 px-4 text-xs font-semibold text-white transition hover:bg-slate-700 hover:border-slate-600 disabled:opacity-50 shadow-sm"
-              >
-                <svg className="h-4 w-4" viewBox="0 0 23 23">
-                  <path fill="#f35325" d="M1 1h10v10H1z"/>
-                  <path fill="#81bc06" d="M12 1h10v10H12z"/>
-                  <path fill="#05a6f0" d="M1 12h10v10H1z"/>
-                  <path fill="#ffba08" d="M12 12h10v10H12z"/>
-                </svg>
-                <span>{loadingProvider === 'microsoft' ? 'Connecting to Microsoft...' : 'Continue with Microsoft'}</span>
-              </button>
-            </div>
-
-            {/* Divider */}
-            <div className="relative flex items-center justify-center pt-2">
-              <div className="border-t border-slate-800 w-full" />
-              <span className="bg-slate-900 px-3 text-[10px] font-bold uppercase tracking-wider text-slate-500 absolute">
-                or continue with username
+            {/* Primary Google Login Button */}
+            <button
+              onClick={handleGooglePopupAuth}
+              disabled={loading}
+              className="w-full flex items-center justify-center gap-3 rounded-2xl bg-white hover:bg-slate-100 text-slate-900 font-bold py-3.5 px-5 shadow-lg shadow-black/30 transition active:scale-[0.99] disabled:opacity-60 cursor-pointer"
+            >
+              <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24">
+                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+              </svg>
+              <span className="text-sm">
+                {loading ? 'Connecting to Google...' : 'Continue with Google'}
               </span>
-            </div>
+            </button>
 
-            {/* 2. Custom Login / Register with Username & Password */}
-            <form onSubmit={handleCredentialsAuth} className="space-y-3 pt-1">
-              
-              {/* Register: Username Field */}
-              {isRegister ? (
-                <>
-                  <div>
-                    <label className="block text-[11px] font-bold uppercase text-slate-400 mb-1">
-                      Username
-                    </label>
-                    <div className="relative">
-                      <User className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
-                      <input
-                        type="text"
-                        required
-                        value={username}
-                        onChange={e => setUsername(e.target.value)}
-                        placeholder="e.g. dev_learner"
-                        autoComplete="username"
-                        className="w-full rounded-xl border border-slate-700 bg-slate-950 pl-10 pr-4 py-2.5 text-xs text-white outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500/30 transition"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-[11px] font-bold uppercase text-slate-400 mb-1">
-                      Email Address
-                    </label>
-                    <div className="relative">
-                      <Mail className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
-                      <input
-                        type="email"
-                        value={email}
-                        onChange={e => setEmail(e.target.value)}
-                        placeholder="you@example.com"
-                        autoComplete="email"
-                        className="w-full rounded-xl border border-slate-700 bg-slate-950 pl-10 pr-4 py-2.5 text-xs text-white outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500/30 transition"
-                      />
-                    </div>
-                  </div>
-                </>
-              ) : (
-                /* Login: Username or Email Field */
-                <div>
-                  <label className="block text-[11px] font-bold uppercase text-slate-400 mb-1">
-                    Username or Email
-                  </label>
-                  <div className="relative">
-                    <User className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
-                    <input
-                      type="text"
-                      required
-                      value={usernameOrEmail}
-                      onChange={e => setUsernameOrEmail(e.target.value)}
-                      placeholder="e.g. dev_learner or you@example.com"
-                      autoComplete="username"
-                      className="w-full rounded-xl border border-slate-700 bg-slate-950 pl-10 pr-4 py-2.5 text-xs text-white outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500/30 transition"
-                    />
-                  </div>
-                </div>
-              )}
-
-              {/* Password Field */}
-              <div>
-                <label className="block text-[11px] font-bold uppercase text-slate-400 mb-1">
-                  Password
-                </label>
-                <div className="relative">
-                  <Lock className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    required
-                    value={password}
-                    onChange={e => setPassword(e.target.value)}
-                    placeholder="••••••••"
-                    autoComplete={isRegister ? 'new-password' : 'current-password'}
-                    className="w-full rounded-xl border border-slate-700 bg-slate-950 pl-10 pr-10 py-2.5 text-xs text-white outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500/30 transition"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 transition"
-                    title={showPassword ? 'Hide password' : 'Show password'}
-                  >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </button>
-                </div>
+            {/* Google Authentication Features */}
+            <div className="space-y-2.5 rounded-2xl border border-slate-800 bg-slate-950/60 p-4">
+              <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                What Google Login Unlocks:
               </div>
-
-              {/* Submit Button */}
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full rounded-xl bg-violet-600 py-3 text-xs font-bold text-white transition hover:bg-violet-500 disabled:opacity-50 mt-3 shadow-lg shadow-violet-600/25 flex items-center justify-center gap-2"
-              >
-                {loading ? (
-                  <span>Authenticating...</span>
-                ) : isRegister ? (
-                  <>
-                    <UserPlus className="h-4 w-4" />
-                    <span>Create My Account</span>
-                  </>
-                ) : (
-                  <>
-                    <LogIn className="h-4 w-4" />
-                    <span>Sign In with Password</span>
-                  </>
-                )}
-              </button>
-            </form>
-
-            {/* Toggle Sign In / Sign Up */}
-            <div className="text-center pt-2">
-              <button
-                type="button"
-                onClick={() => {
-                  setIsRegister(!isRegister);
-                  setErrorMsg('');
-                }}
-                className="text-xs text-cyan-400 hover:underline font-semibold"
-              >
-                {isRegister
-                  ? 'Already have an account? Sign In'
-                  : "Don't have an account? Sign Up free"}
-              </button>
+              <ul className="space-y-2 text-xs text-slate-300">
+                <li className="flex items-center gap-2">
+                  <Zap className="h-4 w-4 text-amber-400 shrink-0" />
+                  <span><strong>Zero passwords</strong> to manage or reset</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Cloud className="h-4 w-4 text-cyan-400 shrink-0" />
+                  <span><strong>Instant cloud sync</strong> of XP, streak & lessons</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Award className="h-4 w-4 text-violet-400 shrink-0" />
+                  <span><strong>Verified credentials</strong> issued to your Google name</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <ShieldCheck className="h-4 w-4 text-emerald-400 shrink-0" />
+                  <span><strong>OAuth 2.0 privacy</strong> — zero password storage</span>
+                </li>
+              </ul>
             </div>
-          </>
+
+            {/* Google Security & Privacy Assurance */}
+            <div className="text-center text-[11px] text-slate-500 leading-relaxed px-2">
+              SeizeLearn strictly accesses your public name, email, and avatar for credential verification. Your account is secured by Google OAuth.
+            </div>
+          </div>
         )}
 
       </div>

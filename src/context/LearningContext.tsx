@@ -100,7 +100,7 @@ interface LearningContextType {
   isOnline: boolean;
   syncStatus: 'synced' | 'syncing' | 'offline' | 'saved_locally';
   findCertificateById: (id: string) => Certificate | undefined;
-  loginLocally: (username: string, email?: string) => void;
+  loginLocally: (username: string, email?: string, photoURL?: string) => void;
   logoutLocally: () => void;
   exportDataAsJSON: () => void;
   deleteAccountAndData: () => Promise<void>;
@@ -586,7 +586,7 @@ export const LearningProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     return undefined;
   };
 
-  const loginLocally = (username: string, email?: string) => {
+  const loginLocally = (username: string, email?: string, photoURL?: string) => {
     const cleanName = username.trim() || 'Learner';
     const cleanEmail = email?.trim() || `${cleanName.toLowerCase().replace(/[^a-z0-9_]/g, '')}@seizelearn.local`;
     setUserState(prev => ({
@@ -595,6 +595,7 @@ export const LearningProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         uid: `user-local-${Date.now()}`,
         displayName: cleanName,
         email: cleanEmail,
+        photoURL,
         isAnonymous: false
       }
     }));

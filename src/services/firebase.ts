@@ -2,12 +2,9 @@ import { initializeApp, getApps, getApp } from 'firebase/app';
 import { 
   getAuth, 
   signInWithPopup, 
+  signInWithCredential,
   GoogleAuthProvider, 
-  OAuthProvider,
   signOut as fbSignOut, 
-  signInWithEmailAndPassword, 
-  createUserWithEmailAndPassword,
-  updateProfile,
   signInAnonymously,
   onAuthStateChanged,
   User as FirebaseUser
@@ -17,7 +14,7 @@ import {
   doc, 
   setDoc, 
   getDoc,
-  deleteDoc,
+  deleteDoc, 
   Firestore 
 } from 'firebase/firestore';
 
@@ -31,22 +28,22 @@ const firebaseConfig = {
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "",
 };
 
+// Google OAuth Client ID for web clients
+export const GOOGLE_CLIENT_ID = 
+  import.meta.env.VITE_GOOGLE_CLIENT_ID || 
+  '462481919288-at905smamnrmun7efha54k0lccv5q3oi.apps.googleusercontent.com';
+
 let app;
 let auth: ReturnType<typeof getAuth> | null = null;
 let db: Firestore | null = null;
 
-// Multi-provider OAuth handlers
+// Google OAuth provider configuration
 const googleProvider = new GoogleAuthProvider();
-const microsoftProvider = new OAuthProvider('microsoft.com');
-const linkedinProvider = new OAuthProvider('oidc.linkedin');
-
-// Add scopes for rich profile retrieval
 googleProvider.addScope('profile');
 googleProvider.addScope('email');
-microsoftProvider.addScope('User.Read');
-linkedinProvider.addScope('openid');
-linkedinProvider.addScope('profile');
-linkedinProvider.addScope('email');
+googleProvider.setCustomParameters({
+  prompt: 'select_account'
+});
 
 try {
   app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
@@ -56,73 +53,21 @@ try {
   console.warn('Firebase initialization note: using local-first storage mode', error);
 }
 
-export { auth, db, googleProvider, microsoftProvider, linkedinProvider };
+export { auth, db, googleProvider };
 
-// 1. Google OAuth
+// 1. Google OAuth Popup
 export async function loginWithGoogle() {
   if (!auth) throw new Error('Firebase Auth not available');
   const result = await signInWithPopup(auth, googleProvider);
   return result.user;
 }
 
-// 2. Microsoft OAuth
-export async function loginWithMicrosoft() {
+// 2. Google OAuth ID Token Credential (used with Google Identity Services / One-Tap)
+export async function loginWithGoogleCredential(idToken: string) {
   if (!auth) throw new Error('Firebase Auth not available');
-  const result = await signInWithPopup(auth, microsoftProvider);
+  const credential = GoogleAuthProvider.credential(idToken);
+  const result = await signInWithCredential(auth, credential);
   return result.user;
-}
-
-// 3. LinkedIn OAuth
-export async function loginWithLinkedIn() {
-  if (!auth) throw new Error('Firebase Auth not available');
-  try {
-    const result = await signInWithPopup(auth, linkedinProvider);
-    return result.user;
-  } catch (err: any) {
-    if (err.code === 'auth/configuration-not-found' || err.code === 'auth/operation-not-allowed') {
-      throw new Error('LinkedIn Authentication: Please ensure LinkedIn OIDC is enabled in your Firebase Console under Authentication > Sign-in method.');
-    }
-    throw err;
-  }
-}
-
-// 4. Custom Login with Username or Email + Password
-export async function loginWithCredentials(usernameOrEmail: string, pass: string) {
-  if (!auth) throw new Error('Firebase Auth not available');
-  const cleanId = usernameOrEmail.trim();
-  // Support either full email or pure username
-  const emailToUse = cleanId.includes('@') ? cleanId : `${cleanId.toLowerCase().replace(/[^a-z0-9_]/g, '')}@seizelearn.local`;
-  const result = await signInWithEmailAndPassword(auth, emailToUse, pass);
-  return result.user;
-}
-
-// 5. Custom Registration with Username, Email & Password
-export async function registerWithCredentials(username: string, email: string, pass: string) {
-  if (!auth) throw new Error('Firebase Auth not available');
-  const cleanUsername = username.trim();
-  const cleanEmail = email.trim();
-  // If email is provided, use it; otherwise generate username-based email handle
-  const emailToUse = cleanEmail || `${cleanUsername.toLowerCase().replace(/[^a-z0-9_]/g, '')}@seizelearn.local`;
-  
-  const result = await createUserWithEmailAndPassword(auth, emailToUse, pass);
-  
-  if (result.user && cleanUsername) {
-    try {
-      await updateProfile(result.user, { displayName: cleanUsername });
-    } catch (e) {
-      console.warn('Could not update display name in auth profile', e);
-    }
-  }
-  return result.user;
-}
-
-// Backward-compatible wrappers
-export async function loginWithEmail(email: string, pass: string) {
-  return loginWithCredentials(email, pass);
-}
-
-export async function registerWithEmail(email: string, pass: string) {
-  return registerWithCredentials('', email, pass);
 }
 
 export async function loginAnonymously() {
