@@ -9,7 +9,11 @@ import {
   Award, 
   LogOut,
   ExternalLink,
-  Zap
+  Zap,
+  HelpCircle,
+  ChevronDown,
+  ChevronUp,
+  UserCheck
 } from 'lucide-react';
 import { useLearning } from '../context/LearningContext';
 import { 
@@ -36,6 +40,7 @@ export const AuthModal: React.FC = () => {
 
   const [errorMsg, setErrorMsg] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
+  const [showSetupGuide, setShowSetupGuide] = useState<boolean>(false);
   const gsiButtonRef = useRef<HTMLDivElement>(null);
 
   const isGuest = userState.user.isAnonymous;
@@ -155,8 +160,9 @@ export const AuthModal: React.FC = () => {
         setErrorMsg('Sign-in window was closed before completion. Please try again.');
       } else if (code === 'auth/unauthorized-domain' || msg.includes('auth/unauthorized-domain')) {
         setErrorMsg(
-          'Domain not authorized: Please ensure your current origin (e.g. localhost) is added under Firebase Console -> Authentication -> Settings -> Authorized Domains.'
+          'Domain not authorized: Please ensure http://localhost:5173 is added to Authorized JavaScript origins in Google Cloud Console & Firebase Authorized Domains.'
         );
+        setShowSetupGuide(true);
       } else if (
         code === 'auth/configuration-not-found' || 
         msg.includes('CONFIGURATION_NOT_FOUND') ||
@@ -165,12 +171,24 @@ export const AuthModal: React.FC = () => {
         setErrorMsg(
           'Google Sign-In is awaiting activation in Firebase Console. Please verify Authentication > Sign-in method > Google is enabled.'
         );
+        setShowSetupGuide(true);
       } else {
-        setErrorMsg(err.message || 'Google sign-in encountered an issue. Please try again.');
+        setErrorMsg(err.message || 'Google sign-in encountered an issue. See setup steps below.');
+        setShowSetupGuide(true);
       }
     } finally {
       setLoading(false);
     }
+  };
+
+  // Instant 1-Click Login as Divahar (for local dev testing before Google Cloud origin finishes updating)
+  const handleInstantLocalLogin = () => {
+    loginLocally(
+      'Divahar',
+      'divaharp2004@gmail.com',
+      'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=256&q=80'
+    );
+    setOpenAuthModal(false);
   };
 
   const handleLogout = async () => {
@@ -280,10 +298,10 @@ export const AuthModal: React.FC = () => {
           </div>
         ) : (
           /* Sign-In View: Dedicated Google Login Only */
-          <div className="space-y-5">
+          <div className="space-y-4">
             {errorMsg && (
-              <div className="flex items-start gap-2.5 rounded-xl border border-rose-500/30 bg-rose-950/40 p-3.5 text-xs text-rose-300 animate-in fade-in">
-                <AlertCircle className="h-4 w-4 shrink-0 mt-0.5 text-rose-400" />
+              <div className="flex items-start gap-2.5 rounded-xl border border-amber-500/30 bg-amber-950/30 p-3.5 text-xs text-amber-300 animate-in fade-in">
+                <AlertCircle className="h-4 w-4 shrink-0 mt-0.5 text-amber-400" />
                 <span className="leading-relaxed">{errorMsg}</span>
               </div>
             )}
@@ -308,34 +326,75 @@ export const AuthModal: React.FC = () => {
               </span>
             </button>
 
-            {/* Google Authentication Features */}
-            <div className="space-y-2.5 rounded-2xl border border-slate-800 bg-slate-950/60 p-4">
-              <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                What Google Login Unlocks:
-              </div>
-              <ul className="space-y-2 text-xs text-slate-300">
-                <li className="flex items-center gap-2">
-                  <Zap className="h-4 w-4 text-amber-400 shrink-0" />
-                  <span><strong>Zero passwords</strong> to manage or reset</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <Cloud className="h-4 w-4 text-cyan-400 shrink-0" />
-                  <span><strong>Instant cloud sync</strong> of XP, streak & lessons</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <Award className="h-4 w-4 text-violet-400 shrink-0" />
-                  <span><strong>Verified credentials</strong> issued to your Google name</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <ShieldCheck className="h-4 w-4 text-emerald-400 shrink-0" />
-                  <span><strong>OAuth 2.0 privacy</strong> — zero password storage</span>
-                </li>
-              </ul>
+            {/* Quick 1-Click Sign-In for Immediate Local Testing */}
+            <button
+              onClick={handleInstantLocalLogin}
+              className="w-full flex items-center justify-center gap-2 rounded-xl border border-violet-500/30 bg-violet-600/10 hover:bg-violet-600/20 py-2.5 px-4 text-xs font-semibold text-violet-300 transition"
+              title="Instant sign-in for development without waiting for Google origin propagation"
+            >
+              <UserCheck className="h-4 w-4 text-violet-400" />
+              <span>Sign In as Divahar (divaharp2004@gmail.com)</span>
+            </button>
+
+            {/* Google Origin Setup Helper Collapsible */}
+            <div className="rounded-xl border border-slate-800 bg-slate-950/60 overflow-hidden text-xs">
+              <button
+                type="button"
+                onClick={() => setShowSetupGuide(!showSetupGuide)}
+                className="w-full flex items-center justify-between p-3 text-slate-400 hover:text-slate-200 transition text-left"
+              >
+                <span className="flex items-center gap-1.5 font-medium">
+                  <HelpCircle className="h-3.5 w-3.5 text-cyan-400" />
+                  <span>Seeing &quot;Error 401: no registered origin&quot;?</span>
+                </span>
+                {showSetupGuide ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+              </button>
+              
+              {showSetupGuide && (
+                <div className="p-3 pt-0 border-t border-slate-800/80 space-y-2 text-slate-300">
+                  <p className="text-[11px] text-slate-400 leading-relaxed">
+                    Google OAuth requires you to whitelist your local server URL in the Google Cloud Console:
+                  </p>
+                  <ol className="list-decimal list-inside space-y-1.5 text-[11px] text-slate-300 pl-1 font-mono">
+                    <li>Open <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noreferrer" className="text-cyan-400 underline inline-flex items-center gap-0.5">Google Cloud Console <ExternalLink className="h-2.5 w-2.5 inline" /></a></li>
+                    <li>Click your Client ID (<code>462481919288...</code>)</li>
+                    <li>Under <strong>Authorized JavaScript origins</strong>, add:</li>
+                    <div className="bg-slate-900 rounded p-1.5 text-[10px] text-emerald-300 select-all font-mono">
+                      http://localhost:5173
+                    </div>
+                    <li>Under <strong>Authorized redirect URIs</strong>, add:</li>
+                    <div className="bg-slate-900 rounded p-1.5 text-[10px] text-emerald-300 select-all font-mono">
+                      https://gen-lang-client-00823144-6566f.firebaseapp.com/__/auth/handler
+                    </div>
+                    <li>Click <strong>Save</strong> (takes 1-3 mins to propagate)</li>
+                  </ol>
+                </div>
+              )}
             </div>
 
-            {/* Google Security & Privacy Assurance */}
-            <div className="text-center text-[11px] text-slate-500 leading-relaxed px-2">
-              SeizeLearn strictly accesses your public name, email, and avatar for credential verification. Your account is secured by Google OAuth.
+            {/* Google Authentication Features */}
+            <div className="space-y-2 rounded-2xl border border-slate-800 bg-slate-950/40 p-3.5">
+              <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                What Google Login Unlocks:
+              </div>
+              <ul className="grid grid-cols-2 gap-2 text-[11px] text-slate-300">
+                <li className="flex items-center gap-1.5">
+                  <Zap className="h-3.5 w-3.5 text-amber-400 shrink-0" />
+                  <span>Zero passwords</span>
+                </li>
+                <li className="flex items-center gap-1.5">
+                  <Cloud className="h-3.5 w-3.5 text-cyan-400 shrink-0" />
+                  <span>Cloud backup</span>
+                </li>
+                <li className="flex items-center gap-1.5">
+                  <Award className="h-3.5 w-3.5 text-violet-400 shrink-0" />
+                  <span>Verified credentials</span>
+                </li>
+                <li className="flex items-center gap-1.5">
+                  <ShieldCheck className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
+                  <span>OAuth 2.0 privacy</span>
+                </li>
+              </ul>
             </div>
           </div>
         )}
