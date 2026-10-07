@@ -2,7 +2,7 @@ export type Language = 'en' | 'ta';
 
 export interface BilingualText {
   en: string;
-  ta: string;
+  ta?: string;
 }
 
 export type DifficultyLevel = 'Beginner' | 'Intermediate' | 'Advanced' | 'Mastery';

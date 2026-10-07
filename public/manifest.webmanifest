@@ -1,7 +1,7 @@
 {
   "name": "SeizeLearn — Practical Skills to Career",
   "short_name": "SeizeLearn",
-  "description": "Practical skills-to-career learning platform in English & Tamil with real-world practice sandboxes.",
+  "description": "Practical skills-to-career learning platform with real-world sandboxes, interactive code testing, and AI tutoring.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#020617",

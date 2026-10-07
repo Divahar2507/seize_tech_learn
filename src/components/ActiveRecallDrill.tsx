@@ -18,16 +18,16 @@ import {
   RefreshCw
 } from 'lucide-react';
 import { useLearning } from '../context/LearningContext';
-import { LearningCategory } from '../types/learning';
+import { LearningCategory, BilingualText } from '../types/learning';
 
 interface EnrichedCard {
   id: string;
-  front: { en: string; ta: string };
-  back: { en: string; ta: string };
+  front: BilingualText;
+  back: BilingualText;
   courseId: string;
-  courseTitle: { en: string; ta: string };
+  courseTitle: BilingualText;
   lessonId: string;
-  lessonTitle: { en: string; ta: string };
+  lessonTitle: BilingualText;
   category: LearningCategory;
 }
 

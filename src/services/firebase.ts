@@ -17,6 +17,7 @@ import {
   doc, 
   setDoc, 
   getDoc,
+  deleteDoc,
   Firestore 
 } from 'firebase/firestore';
 
@@ -168,3 +169,83 @@ export async function fetchUserStateFromCloud(uid: string) {
     return null;
   }
 }
+
+// Public learner profile fetcher for verified portfolio showcase
+export async function fetchPublicProfile(uid: string) {
+  if (!db || !uid) return null;
+  try {
+    const userDocRef = doc(db, 'users', uid);
+    const snap = await getDoc(userDocRef);
+    if (snap.exists()) {
+      const data = snap.data();
+      // Expose only public portfolio attributes
+      return {
+        uid,
+        displayName: data.user?.displayName || 'Learner',
+        photoURL: data.user?.photoURL,
+        xp: data.xp || 0,
+        streak: data.streak || 0,
+        earnedBadgeIds: data.earnedBadgeIds || [],
+        certificates: data.certificates || [],
+        projectSubmissions: data.projectSubmissions || {},
+        completedLessonIds: data.completedLessonIds || []
+      };
+    }
+    return null;
+  } catch (err) {
+    console.warn('Error fetching public profile:', err);
+    return null;
+  }
+}
+
+// Project proof cloud sync
+export async function syncSubmissionToCloud(submissionId: string, data: any) {
+  if (!db || !submissionId) return;
+  try {
+    const subRef = doc(db, 'submissions', submissionId);
+    await setDoc(subRef, { ...data, updatedAt: new Date().toISOString() }, { merge: true });
+  } catch (err) {
+    console.warn('Could not sync submission to cloud:', err);
+  }
+}
+
+// Save certificate to cloud collection for instant global verification
+export async function saveCertificateToCloud(certificate: any) {
+  if (!db || !certificate?.certificateCode) return;
+  try {
+    const certRef = doc(db, 'certificates', certificate.certificateCode);
+    await setDoc(certRef, { ...certificate, syncedAt: new Date().toISOString() }, { merge: true });
+  } catch (err) {
+    console.warn('Could not sync certificate to cloud:', err);
+  }
+}
+
+// Fetch certificate from cloud collection
+export async function fetchCertificateFromCloud(certificateCode: string) {
+  if (!db || !certificateCode) return null;
+  try {
+    const certRef = doc(db, 'certificates', certificateCode);
+    const snap = await getDoc(certRef);
+    if (snap.exists()) {
+      return snap.data();
+    }
+    return null;
+  } catch (err) {
+    console.warn('Cloud certificate fetch error:', err);
+    return null;
+  }
+}
+
+// GDPR / CCPA right-to-be-forgotten: delete user data from cloud
+export async function deleteUserDataFromCloud(uid: string) {
+  if (!db || !uid) return false;
+  try {
+    const userDocRef = doc(db, 'users', uid);
+    await deleteDoc(userDocRef);
+    return true;
+  } catch (err) {
+    console.error('Error deleting cloud user data:', err);
+    return false;
+  }
+}
+

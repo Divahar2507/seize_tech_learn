@@ -22,6 +22,7 @@ const RoadmapView = React.lazy(() => import('./components/RoadmapView').then(m =
 const PracticeStudio = React.lazy(() => import('./components/PracticeStudio').then(m => ({ default: m.PracticeStudio })));
 const ActiveRecallDrill = React.lazy(() => import('./components/ActiveRecallDrill').then(m => ({ default: m.ActiveRecallDrill })));
 const CertificateVerificationView = React.lazy(() => import('./components/CertificateVerificationView').then(m => ({ default: m.CertificateVerificationView })));
+const PortfolioProfileView = React.lazy(() => import('./components/PortfolioProfileView').then(m => ({ default: m.PortfolioProfileView })));
 
 // Lazy-loaded modals & drawers
 const SearchModal = React.lazy(() => import('./components/SearchModal').then(m => ({ default: m.SearchModal })));
@@ -95,7 +96,7 @@ const NavigationSync: React.FC = () => {
 
   // 2. Sync Context State -> URL (when buttons in UI change activeTab / course / lesson)
   useEffect(() => {
-    if (isSyncingFromUrl.current || location.pathname.startsWith('/verify/')) return;
+    if (isSyncingFromUrl.current || location.pathname.startsWith('/verify/') || location.pathname.startsWith('/profile')) return;
 
     let targetPath = '/';
     if (activeTab === 'home') targetPath = '/';
@@ -135,6 +136,8 @@ const MainLayout: React.FC = () => {
             <Route path="/practice" element={<PracticeStudio />} />
             <Route path="/practice/:toolId" element={<PracticeStudio />} />
             <Route path="/drills" element={<ActiveRecallDrill />} />
+            <Route path="/profile" element={<PortfolioProfileView />} />
+            <Route path="/profile/:username" element={<PortfolioProfileView />} />
             <Route path="/verify/:certificateId" element={<CertificateVerificationView />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

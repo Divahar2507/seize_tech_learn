@@ -16,8 +16,15 @@ import {
 import { INITIAL_COURSES } from '../data/coursesData';
 import { INITIAL_PROJECTS } from '../data/projectsData';
 import { DAILY_CHALLENGES } from '../data/dailyChallenges';
-import { ALL_BADGES } from '../data/badgesData';
-import { subscribeToAuth, syncUserStateToCloud, fetchUserStateFromCloud, logoutUser } from '../services/firebase';
+import { 
+  subscribeToAuth, 
+  syncUserStateToCloud, 
+  fetchUserStateFromCloud, 
+  logoutUser,
+  saveCertificateToCloud,
+  syncSubmissionToCloud,
+  deleteUserDataFromCloud
+} from '../services/firebase';
 
 const STORAGE_KEY = 'seize_learn_platform_v3';
 
@@ -91,9 +98,12 @@ interface LearningContextType {
   searchQuery: string;
   setSearchQuery: (q: string) => void;
   isOnline: boolean;
+  syncStatus: 'synced' | 'syncing' | 'offline' | 'saved_locally';
   findCertificateById: (id: string) => Certificate | undefined;
   loginLocally: (username: string, email?: string) => void;
   logoutLocally: () => void;
+  exportDataAsJSON: () => void;
+  deleteAccountAndData: () => Promise<void>;
 }
 
 const LearningContext = createContext<LearningContextType | undefined>(undefined);
@@ -127,18 +137,29 @@ export const LearningProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [selectedCertificate, setSelectedCertificate] = useState<Certificate | null>(null);
 
   const [isOnline, setIsOnline] = useState<boolean>(typeof navigator !== 'undefined' ? navigator.onLine : true);
+  const [syncStatus, setSyncStatus] = useState<'synced' | 'syncing' | 'offline' | 'saved_locally'>('saved_locally');
 
   // Monitor network connectivity
   useEffect(() => {
-    const handleOnline = () => setIsOnline(true);
-    const handleOffline = () => setIsOnline(false);
+    const handleOnline = () => {
+      setIsOnline(true);
+      if (!userState.user.isAnonymous) {
+        setSyncStatus('synced');
+      } else {
+        setSyncStatus('saved_locally');
+      }
+    };
+    const handleOffline = () => {
+      setIsOnline(false);
+      setSyncStatus('offline');
+    };
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
     return () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
     };
-  }, []);
+  }, [userState.user.isAnonymous]);
 
   // Sync to localStorage immediately, and debounced to Firestore cloud
   useEffect(() => {
@@ -148,9 +169,25 @@ export const LearningProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       console.error('Error saving local state', e);
     }
 
-    if (!userState.user.isAnonymous && userState.user.uid && isOnline) {
-      const timer = setTimeout(() => {
-        syncUserStateToCloud(userState.user.uid, userState);
+    if (!isOnline) {
+      setSyncStatus('offline');
+      return;
+    }
+
+    if (userState.user.isAnonymous) {
+      setSyncStatus('saved_locally');
+      return;
+    }
+
+    if (!userState.user.isAnonymous && userState.user.uid) {
+      setSyncStatus('syncing');
+      const timer = setTimeout(async () => {
+        try {
+          await syncUserStateToCloud(userState.user.uid, userState);
+          setSyncStatus('synced');
+        } catch {
+          setSyncStatus('saved_locally');
+        }
       }, 1200);
       return () => clearTimeout(timer);
     }
@@ -376,10 +413,18 @@ export const LearningProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         checklistCompletedIds: completedChecklistIds,
         status: 'submitted',
         feedback: {
-          en: 'Project proof submitted successfully! Verified for portfolio presentation.',
-          ta: 'திட்டப்பணி வெற்றிகரமாக சமர்ப்பிக்கப்பட்டது! போர்ட்ஃபோலியோவிற்காக சரிபார்க்கப்பட்டது.'
+          en: 'Project proof submitted successfully! Verified for public portfolio presentation.'
         }
       };
+
+      if (!prev.user.isAnonymous && prev.user.uid) {
+        syncSubmissionToCloud(`${projectId}_${prev.user.uid}`, {
+          ...newSubmission,
+          userId: prev.user.uid,
+          userName: prev.user.displayName || 'Learner',
+          userPhoto: prev.user.photoURL || null
+        });
+      }
 
       return {
         ...prev,
@@ -497,6 +542,10 @@ export const LearningProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     setSelectedCertificate(newCert);
     setOpenCertificateModal(true);
     triggerCelebration();
+
+    // Sync accredited certificate to cloud for public verification
+    saveCertificateToCloud(newCert);
+
     return newCert;
   };
 
@@ -565,6 +614,26 @@ export const LearningProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }));
   };
 
+  const exportDataAsJSON = () => {
+    const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(userState, null, 2));
+    const downloadAnchor = document.createElement('a');
+    downloadAnchor.setAttribute('href', dataStr);
+    downloadAnchor.setAttribute('download', `seizelearn-backup-${userState.user.displayName || 'learner'}-${new Date().toISOString().split('T')[0]}.json`);
+    document.body.appendChild(downloadAnchor);
+    downloadAnchor.click();
+    downloadAnchor.remove();
+  };
+
+  const deleteAccountAndData = async () => {
+    if (!userState.user.isAnonymous && userState.user.uid) {
+      await deleteUserDataFromCloud(userState.user.uid);
+      await logoutUser();
+    }
+    localStorage.removeItem(STORAGE_KEY);
+    setUserState(INITIAL_USER_STATE);
+    setSyncStatus('saved_locally');
+  };
+
   return (
     <LearningContext.Provider
       value={{
@@ -614,9 +683,12 @@ export const LearningProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         searchQuery,
         setSearchQuery,
         isOnline,
+        syncStatus,
         findCertificateById,
         loginLocally,
-        logoutLocally
+        logoutLocally,
+        exportDataAsJSON,
+        deleteAccountAndData
       }}
     >
       {children}

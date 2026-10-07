@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { 
   Trophy, 
   Flame, 
@@ -17,7 +18,11 @@ import {
   Calendar,
   Zap,
   Share2,
-  Check
+  Check,
+  Download,
+  Trash2,
+  Globe,
+  UserCheck
 } from 'lucide-react';
 import { useLearning } from '../context/LearningContext';
 import { ALL_BADGES } from '../data/badgesData';
@@ -36,7 +41,10 @@ export const GrowthDashboard: React.FC = () => {
     setOpenCertificateModal, 
     generateCertificate,
     setActiveTab,
-    setOpenDailyChallengeModal
+    setOpenDailyChallengeModal,
+    exportDataAsJSON,
+    deleteAccountAndData,
+    syncStatus
   } = useLearning();
 
   const categories: { name: LearningCategory; icon: any; color: string }[] = [
@@ -567,6 +575,82 @@ export const GrowthDashboard: React.FC = () => {
             </div>
           </div>
         )}
+      </div>
+
+      {/* Public Portfolio Showcase Hub */}
+      <div className="relative overflow-hidden rounded-2xl border border-cyan-500/30 bg-gradient-to-r from-slate-900 via-slate-950 to-slate-900 p-6 sm:p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+        <div className="space-y-1.5 max-w-xl">
+          <div className="inline-flex items-center gap-1.5 rounded-full border border-cyan-500/30 bg-cyan-500/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-cyan-300">
+            <Globe className="h-3 w-3" />
+            <span>Public Showcase</span>
+          </div>
+          <h3 className="font-heading text-xl font-bold text-white">
+            Your Live Developer & Career Portfolio
+          </h3>
+          <p className="text-xs text-slate-400">
+            Share your verified project proofs, accredited certificates, and earned competencies directly with recruiters and hiring managers.
+          </p>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-3">
+          <Link
+            to="/profile"
+            className="inline-flex items-center gap-2 rounded-xl bg-cyan-400 hover:bg-cyan-300 px-4 py-2.5 text-xs font-bold text-slate-950 transition shadow-lg shadow-cyan-500/20"
+          >
+            <UserCheck className="h-4 w-4" />
+            <span>View Public Portfolio</span>
+          </Link>
+          <button
+            onClick={() => {
+              const url = `${window.location.origin}/profile`;
+              navigator.clipboard.writeText(url);
+              alert('Portfolio URL copied to clipboard: ' + url);
+            }}
+            className="inline-flex items-center gap-1.5 rounded-xl border border-slate-700 bg-slate-800 hover:bg-slate-700 px-3.5 py-2.5 text-xs font-bold text-slate-200 transition"
+          >
+            <Share2 className="h-3.5 w-3.5 text-slate-400" />
+            <span>Copy Link</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Account Settings & Privacy Compliance (GDPR/CCPA) */}
+      <div className="rounded-2xl border border-slate-800/80 bg-slate-900/40 p-6 sm:p-8 space-y-4">
+        <div>
+          <h3 className="font-heading text-base font-bold text-white">
+            Account Management & Privacy Controls
+          </h3>
+          <p className="mt-1 text-xs text-slate-400">
+            Export your complete learning records or manage your cloud persistence footprint (GDPR / CCPA compliant).
+          </p>
+        </div>
+
+        <div className="flex flex-wrap items-center justify-between gap-4 pt-2 border-t border-slate-800">
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+              onClick={exportDataAsJSON}
+              className="inline-flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-800/80 hover:bg-slate-800 px-3.5 py-2 text-xs font-bold text-slate-200 transition"
+            >
+              <Download className="h-3.5 w-3.5 text-cyan-400" />
+              <span>Download My Data (JSON)</span>
+            </button>
+            <span className="text-[11px] text-slate-500">
+              Includes all quiz logs, project briefs, and certificates.
+            </span>
+          </div>
+
+          <button
+            onClick={() => {
+              if (window.confirm('Are you sure you want to delete your account data and reset your progress? This action cannot be undone.')) {
+                deleteAccountAndData();
+              }
+            }}
+            className="inline-flex items-center gap-1.5 rounded-xl border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 px-3 py-2 text-xs font-bold text-rose-300 transition"
+          >
+            <Trash2 className="h-3.5 w-3.5 text-rose-400" />
+            <span>Reset & Delete Account</span>
+          </button>
+        </div>
       </div>
 
     </div>

@@ -27,7 +27,8 @@ export const Header: React.FC = () => {
     setOpenDailyChallengeModal, 
     setOpenAuthModal,
     setOpenSearchModal,
-    isOnline
+    isOnline,
+    syncStatus
   } = useLearning();
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
@@ -59,10 +60,30 @@ export const Header: React.FC = () => {
                 <span className="rounded-full border border-violet-400/40 bg-violet-500/10 px-1.5 py-0.5 text-[9px] font-bold text-violet-300">
                   PROD
                 </span>
-                {!isOnline && (
-                  <span className="hidden sm:inline-flex items-center gap-1 rounded-full border border-amber-500/30 bg-amber-500/10 px-1.5 py-0.5 text-[9px] font-bold text-amber-300">
+                
+                {/* Real-time Cloud Sync & Network Status Badge */}
+                {syncStatus === 'syncing' && (
+                  <span className="hidden sm:inline-flex items-center gap-1 rounded-full border border-cyan-500/30 bg-cyan-500/10 px-1.5 py-0.5 text-[9px] font-bold text-cyan-300" title="Syncing progress to cloud database">
+                    <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-ping" />
+                    Syncing...
+                  </span>
+                )}
+                {syncStatus === 'synced' && (
+                  <span className="hidden sm:inline-flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-1.5 py-0.5 text-[9px] font-bold text-emerald-300" title="All progress synced to cloud">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                    Synced
+                  </span>
+                )}
+                {syncStatus === 'offline' && (
+                  <span className="hidden sm:inline-flex items-center gap-1 rounded-full border border-amber-500/30 bg-amber-500/10 px-1.5 py-0.5 text-[9px] font-bold text-amber-300" title="No internet connection. Progress saved locally.">
                     <span className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse" />
                     Offline
+                  </span>
+                )}
+                {syncStatus === 'saved_locally' && (
+                  <span className="hidden sm:inline-flex items-center gap-1 rounded-full border border-slate-700 bg-slate-800/60 px-1.5 py-0.5 text-[9px] font-bold text-slate-400" title="Saved locally on this device. Sign in to sync across devices.">
+                    <span className="h-1.5 w-1.5 rounded-full bg-slate-400" />
+                    Local
                   </span>
                 )}
               </div>

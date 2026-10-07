@@ -22,9 +22,19 @@ import {
   ChevronDown,
   ChevronUp,
   AlertTriangle,
-  Info
+  Info,
+  TestTube2,
+  Bot,
+  X
 } from 'lucide-react';
 import { useLearning } from '../context/LearningContext';
+import { 
+  evaluatePromptCTCO, 
+  explainOrDebugCode, 
+  evaluateSpeechOrInterview, 
+  CodeReviewResult, 
+  SpeechEvaluationResult 
+} from '../services/ai';
 
 type PracticeTool = 'web' | 'ai' | 'speech' | 'resume';
 
@@ -271,6 +281,27 @@ export const PracticeStudio: React.FC = () => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const consoleBottomRef = useRef<HTMLDivElement>(null);
 
+  // Automated Unit Testing & AI CodeLab State
+  interface TestCaseResult {
+    id: string;
+    title: string;
+    hint: string;
+    passed: boolean;
+  }
+  const [testResults, setTestResults] = useState<TestCaseResult[]>([]);
+  const [hasRunTests, setHasRunTests] = useState(false);
+  const [rightPanelTab, setRightPanelTab] = useState<'preview' | 'tests'>('preview');
+
+  // AI Code Tutor Review State
+  const [aiReview, setAiReview] = useState<CodeReviewResult | null>(null);
+  const [isAiReviewing, setIsAiReviewing] = useState(false);
+  const [showAiModal, setShowAiModal] = useState(false);
+  const [isLiveAIPrompt, setIsLiveAIPrompt] = useState(false);
+
+  // AI Speech Evaluation State
+  const [speechAiResult, setSpeechAiResult] = useState<SpeechEvaluationResult | null>(null);
+  const [isEvaluatingSpeech, setIsEvaluatingSpeech] = useState(false);
+
   // 2. AI Prompt State
   const [promptText, setPromptText] = useState(
     `You are an expert React mentor. [Context]\nExplain React 19 optimistic updates to a junior developer in 3 short paragraphs. [Task]\nDo not use complex jargon, and use a restaurant ordering analogy. [Constraints]\nProvide output as clean Markdown with a 1-sentence takeaway. [Output]`
@@ -437,33 +468,155 @@ export const PracticeStudio: React.FC = () => {
     setIframeSrc(combined);
   }, [htmlCode, cssCode, jsCode]);
 
-  // C.T.C.O Prompt Analyzer
-  const handleEvaluatePrompt = () => {
-    const text = promptText.toLowerCase();
-    const hasContext = text.includes('you are') || text.includes('context') || text.includes('role') || text.includes('mentor') || text.includes('engineer');
-    const hasTask = text.includes('explain') || text.includes('draft') || text.includes('write') || text.includes('task') || text.includes('create') || text.includes('summarize');
-    const hasConstraints = text.includes('do not') || text.includes('avoid') || text.includes('max') || text.includes('limit') || text.includes('constraint') || text.includes('without');
-    const hasOutput = text.includes('output') || text.includes('markdown') || text.includes('bullet') || text.includes('table') || text.includes('format') || text.includes('paragraph');
+  // Automated DOM Test Runner for Web CodeLab
+  const handleRunTests = () => {
+    let results: TestCaseResult[] = [];
+    const iframe = iframeRef.current;
+    const doc = iframe?.contentDocument || iframe?.contentWindow?.document;
 
-    let score = 0;
-    const tips: string[] = [];
+    if (selectedWebTpl.id === 'flex-cards') {
+      const hasFlex = cssCode.includes('display: flex') || (doc && doc.querySelector('.card-container') && window.getComputedStyle(doc.querySelector('.card-container')!).display === 'flex');
+      const cards = doc ? doc.querySelectorAll('.card').length : (htmlCode.match(/class=["'][^"']*card[^"']*["']/g) || []).length;
+      const buttons = doc ? doc.querySelectorAll('.btn').length : (htmlCode.match(/class=["'][^"']*btn[^"']*["']/g) || []).length;
+      const hasHover = cssCode.includes(':hover') || cssCode.includes('transition');
 
-    if (hasContext) score += 25; else tips.push('Add Context/Persona: Specify who the AI is acting as (e.g. "You are an expert engineer").');
-    if (hasTask) score += 25; else tips.push('Clarify the Task: State the precise action required (e.g. "Draft", "Summarize").');
-    if (hasConstraints) score += 25; else tips.push('Add Negative Constraints: What should it avoid? (e.g. "Do not use buzzwords, max 150 words").');
-    if (hasOutput) score += 25; else tips.push('Define Output Format: Request specific markdown, table, or structured bullets.');
+      results = [
+        {
+          id: 't1',
+          title: 'Flexbox Layout Declaration',
+          hint: 'Ensure .card-container has "display: flex" declared.',
+          passed: Boolean(hasFlex)
+        },
+        {
+          id: 't2',
+          title: 'Multiple Card Components Rendered',
+          hint: 'Render at least 2 .card elements in the HTML structure.',
+          passed: cards >= 2
+        },
+        {
+          id: 't3',
+          title: 'Action Buttons Present',
+          hint: 'Include a .btn button in each card component.',
+          passed: buttons >= 2
+        },
+        {
+          id: 't4',
+          title: 'Interactive Hover State & Polish',
+          hint: 'Add a :hover transition effect to improve UX feedback.',
+          passed: hasHover
+        }
+      ];
+    } else if (selectedWebTpl.id === 'counter-ui') {
+      const hasDisplay = !!doc?.getElementById('count-display') || htmlCode.includes('id="count-display"');
+      const hasInc = !!doc?.getElementById('inc-btn') || htmlCode.includes('id="inc-btn"');
+      const hasDec = !!doc?.getElementById('dec-btn') || htmlCode.includes('id="dec-btn"');
+      const hasReset = !!doc?.getElementById('reset-btn') || htmlCode.includes('id="reset-btn"');
 
-    setPromptScore(score);
-    setPromptFeedback(tips);
+      results = [
+        {
+          id: 't1',
+          title: 'Counter Display Node',
+          hint: 'Element with id="count-display" must be present.',
+          passed: hasDisplay
+        },
+        {
+          id: 't2',
+          title: 'Increment & Decrement Triggers',
+          hint: 'Buttons with id="inc-btn" and id="dec-btn" must exist.',
+          passed: hasInc && hasDec
+        },
+        {
+          id: 't3',
+          title: 'Reset Trigger Button',
+          hint: 'Button with id="reset-btn" must be present.',
+          passed: hasReset
+        },
+        {
+          id: 't4',
+          title: 'Event Listener Logic',
+          hint: 'Ensure onclick handlers or event listeners are wired in JS.',
+          passed: jsCode.includes('onclick') || jsCode.includes('addEventListener')
+        }
+      ];
+    } else {
+      const hasBtn = !!doc?.getElementById('fetch-btn') || htmlCode.includes('id="fetch-btn"');
+      const hasStatus = !!doc?.getElementById('status-text') || htmlCode.includes('id="status-text"');
+      const hasOutput = !!doc?.getElementById('output-box') || htmlCode.includes('id="output-box"');
 
+      results = [
+        {
+          id: 't1',
+          title: 'Fetch Action Button',
+          hint: 'Button with id="fetch-btn" must be present.',
+          passed: hasBtn
+        },
+        {
+          id: 't2',
+          title: 'Live Status Element',
+          hint: 'Element with id="status-text" must exist for async status.',
+          passed: hasStatus
+        },
+        {
+          id: 't3',
+          title: 'Output Display Container',
+          hint: 'Element with id="output-box" must exist for response payloads.',
+          passed: hasOutput
+        }
+      ];
+    }
+
+    setTestResults(results);
+    setHasRunTests(true);
+    setRightPanelTab('tests');
+
+    if (results.every(r => r.passed)) {
+      triggerConfetti();
+    }
+  };
+
+  // AI Code Tutor Assistant
+  const handleRequestAiReview = async () => {
+    setIsAiReviewing(true);
+    setShowAiModal(true);
+    try {
+      const result = await explainOrDebugCode(htmlCode, cssCode, jsCode);
+      setAiReview(result);
+    } catch (err) {
+      console.warn('AI review error', err);
+    } finally {
+      setIsAiReviewing(false);
+    }
+  };
+
+  // C.T.C.O Prompt Analyzer (Powered by Gemini AI + Heuristic Fallback)
+  const handleEvaluatePrompt = async () => {
     setIsSimulating(true);
-    setTimeout(() => {
+    try {
+      const result = await evaluatePromptCTCO(promptText);
+      setPromptScore(result.score);
+      setPromptFeedback(result.improvements.length > 0 ? result.improvements : result.feedback);
+      setSimulatedOutput(result.simulatedOutput);
+      setIsLiveAIPrompt(result.isLiveAI);
+      if (result.score >= 75) triggerConfetti();
+    } catch (err) {
+      console.warn('Prompt evaluation error', err);
+    } finally {
       setIsSimulating(false);
-      setSimulatedOutput(
-        `### React 19 Optimistic UI Explained\n\nImagine ordering food at a restaurant. An **optimistic update** is like the waiter immediately writing down your order and smiling—they assume the kitchen will succeed without making you wait at the counter for 20 minutes.\n\nIn React 19, \`useOptimistic\` shows the user their new item instantly in the UI before the server responds. If the server request succeeds, the temporary state is made permanent. If it fails, React seamlessly reverts back to the original state.\n\n**Takeaway:** Optimistic updates eliminate perceived network delay by updating the screen before server confirmation.`
-      );
-      if (score >= 75) triggerConfetti();
-    }, 600);
+    }
+  };
+
+  // AI Speech & Pitch Evaluation
+  const handleEvaluateSpeechWithAi = async () => {
+    setIsEvaluatingSpeech(true);
+    try {
+      const res = await evaluateSpeechOrInterview(transcript || speechText, speechText);
+      setSpeechAiResult(res);
+      if (res.score >= 80) triggerConfetti();
+    } catch (err) {
+      console.warn('Speech evaluation error', err);
+    } finally {
+      setIsEvaluatingSpeech(false);
+    }
   };
 
   // Web Speech API Voice Handlers
@@ -625,17 +778,36 @@ export const PracticeStudio: React.FC = () => {
               </select>
             </div>
 
-            <button
-              onClick={() => {
-                setHtmlCode(selectedWebTpl.html);
-                setCssCode(selectedWebTpl.css);
-                setJsCode(selectedWebTpl.js);
-              }}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-700 bg-slate-900 px-3 py-1.5 text-xs font-semibold text-slate-300 hover:text-white"
-            >
-              <RotateCcw className="h-3.5 w-3.5" />
-              <span>Reset Template</span>
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleRequestAiReview}
+                className="inline-flex items-center gap-1.5 rounded-xl border border-violet-500/40 bg-violet-500/10 hover:bg-violet-500/20 px-3 py-1.5 text-xs font-bold text-violet-300 transition"
+              >
+                <Bot className="h-3.5 w-3.5" />
+                <span>AI Code Review</span>
+              </button>
+
+              <button
+                onClick={handleRunTests}
+                className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 px-3 py-1.5 text-xs font-bold text-white transition shadow-sm"
+              >
+                <TestTube2 className="h-3.5 w-3.5" />
+                <span>Run Tests ({hasRunTests ? `${testResults.filter(t => t.passed).length}/${testResults.length}` : 'Start'})</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  setHtmlCode(selectedWebTpl.html);
+                  setCssCode(selectedWebTpl.css);
+                  setJsCode(selectedWebTpl.js);
+                  setHasRunTests(false);
+                }}
+                className="inline-flex items-center gap-1.5 rounded-xl border border-slate-700 bg-slate-900 px-3 py-1.5 text-xs font-semibold text-slate-300 hover:text-white"
+              >
+                <RotateCcw className="h-3.5 w-3.5" />
+                <span>Reset</span>
+              </button>
+            </div>
           </div>
 
           <div className="grid gap-6 lg:grid-cols-2">
@@ -691,30 +863,114 @@ export const PracticeStudio: React.FC = () => {
 
             {/* Live Sandbox Preview & Interactive Console Panel */}
             <div className="space-y-4">
-              {/* Sandbox Preview Window */}
+              {/* Sandbox Preview & Test Runner Window */}
               <div className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-950 flex flex-col shadow-xl">
-                <div className="border-b border-slate-800 bg-slate-900 px-4 py-2.5 flex items-center justify-between">
+                <div className="border-b border-slate-800 bg-slate-900 px-4 py-2 flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <span className="h-2.5 w-2.5 rounded-full bg-rose-500" />
-                    <span className="h-2.5 w-2.5 rounded-full bg-amber-500" />
-                    <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
-                    <span className="text-xs font-mono text-slate-400 ml-2">Live Web Sandbox</span>
+                    <button
+                      onClick={() => setRightPanelTab('preview')}
+                      className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-bold transition ${
+                        rightPanelTab === 'preview' ? 'bg-cyan-500/20 text-cyan-300' : 'text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      <Play className="h-3 w-3" />
+                      <span>Live Preview</span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        setRightPanelTab('tests');
+                        if (!hasRunTests) handleRunTests();
+                      }}
+                      className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-bold transition ${
+                        rightPanelTab === 'tests' ? 'bg-emerald-500/20 text-emerald-300' : 'text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      <TestTube2 className="h-3 w-3" />
+                      <span>Unit Tests {hasRunTests ? `(${testResults.filter(t => t.passed).length}/${testResults.length})` : ''}</span>
+                    </button>
                   </div>
+
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] text-emerald-400 font-bold flex items-center gap-1">
-                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                      Live Sync
-                    </span>
+                    {rightPanelTab === 'preview' ? (
+                      <span className="text-[10px] text-emerald-400 font-bold flex items-center gap-1">
+                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                        Live Sync
+                      </span>
+                    ) : (
+                      <button
+                        onClick={handleRunTests}
+                        className="rounded-lg bg-emerald-600/30 text-emerald-300 hover:bg-emerald-600/50 border border-emerald-500/40 px-2 py-0.5 text-[10px] font-bold transition"
+                      >
+                        Re-run Tests
+                      </button>
+                    )}
                   </div>
                 </div>
 
-                <iframe
-                  ref={iframeRef}
-                  title="Live Sandbox"
-                  srcDoc={iframeSrc}
-                  sandbox="allow-scripts allow-modals"
-                  className="w-full h-[320px] border-none bg-white rounded-b-none"
-                />
+                {rightPanelTab === 'preview' ? (
+                  <iframe
+                    ref={iframeRef}
+                    title="Live Sandbox"
+                    srcDoc={iframeSrc}
+                    sandbox="allow-scripts allow-modals"
+                    className="w-full h-[320px] border-none bg-white rounded-b-none"
+                  />
+                ) : (
+                  <div className="w-full h-[320px] bg-slate-950 p-4 overflow-y-auto space-y-3 font-mono text-xs">
+                    <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+                      <span className="text-slate-400 font-bold uppercase tracking-wider text-[11px]">
+                        DOM Test Assertions Suite
+                      </span>
+                      <span className={`font-bold text-xs ${testResults.length > 0 && testResults.every(t => t.passed) ? 'text-emerald-400' : 'text-amber-400'}`}>
+                        {testResults.filter(t => t.passed).length} / {testResults.length} Passing
+                      </span>
+                    </div>
+
+                    {!hasRunTests ? (
+                      <div className="py-12 text-center text-slate-500">
+                        Click "Run Test Suite" to verify your code against automated assertions.
+                      </div>
+                    ) : (
+                      <div className="space-y-2.5">
+                        {testResults.map(test => (
+                          <div
+                            key={test.id}
+                            className={`rounded-xl border p-3 flex items-start gap-3 transition ${
+                              test.passed
+                                ? 'border-emerald-500/30 bg-emerald-950/20 text-emerald-200'
+                                : 'border-rose-500/30 bg-rose-950/20 text-rose-200'
+                            }`}
+                          >
+                            <span className="shrink-0 mt-0.5">
+                              {test.passed ? (
+                                <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+                              ) : (
+                                <AlertCircle className="h-4 w-4 text-rose-400" />
+                              )}
+                            </span>
+                            <div className="flex-1">
+                              <div className="flex items-center justify-between">
+                                <span className="font-bold text-xs text-white">{test.title}</span>
+                                <span className={`text-[10px] uppercase font-black px-1.5 py-0.5 rounded ${
+                                  test.passed ? 'bg-emerald-500/20 text-emerald-300' : 'bg-rose-500/20 text-rose-300'
+                                }`}>
+                                  {test.passed ? 'PASS' : 'FAIL'}
+                                </span>
+                              </div>
+                              <p className="mt-1 text-[11px] text-slate-400 font-sans">{test.hint}</p>
+                            </div>
+                          </div>
+                        ))}
+
+                        {testResults.length > 0 && testResults.every(t => t.passed) && (
+                          <div className="rounded-xl border border-emerald-500/40 bg-emerald-500/10 p-3 text-center text-emerald-300 font-sans text-xs font-bold">
+                            🎉 All automated unit test assertions passed! Verified for production quality.
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* In-Browser Live JS Console & Terminal */}
@@ -870,8 +1126,17 @@ export const PracticeStudio: React.FC = () => {
         <div className="grid gap-6 lg:grid-cols-2">
           <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-6 space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="font-heading text-lg font-bold text-white">
-                C.T.C.O Prompt Laboratory
+              <h3 className="font-heading text-lg font-bold text-white flex items-center gap-2">
+                <span>C.T.C.O Prompt Laboratory</span>
+                {isLiveAIPrompt ? (
+                  <span className="rounded-full border border-violet-400/40 bg-violet-500/10 px-2 py-0.5 text-[10px] font-bold text-violet-300">
+                    Live Gemini AI
+                  </span>
+                ) : (
+                  <span className="rounded-full border border-slate-700 bg-slate-800 px-2 py-0.5 text-[10px] text-slate-400">
+                    Heuristic Evaluator
+                  </span>
+                )}
               </h3>
               <span className="text-xs font-mono text-violet-400">Context · Task · Constraints · Output</span>
             </div>
@@ -997,6 +1262,15 @@ export const PracticeStudio: React.FC = () => {
                 {isRecording ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
                 <span>{isRecording ? 'Stop Recording' : 'Record My Voice'}</span>
               </button>
+
+              <button
+                onClick={handleEvaluateSpeechWithAi}
+                disabled={isEvaluatingSpeech}
+                className="inline-flex items-center gap-2 rounded-xl bg-violet-600 px-5 py-2.5 text-xs font-bold text-white hover:bg-violet-500 transition shadow-lg shadow-violet-600/20 disabled:opacity-50"
+              >
+                <Bot className="h-4 w-4" />
+                <span>{isEvaluatingSpeech ? 'AI Analyzing...' : 'AI Pitch Coach (+XP)'}</span>
+              </button>
             </div>
           </div>
 
@@ -1029,6 +1303,29 @@ export const PracticeStudio: React.FC = () => {
                 })}
               </div>
             </div>
+
+            {speechAiResult && (
+              <div className="rounded-xl border border-violet-500/30 bg-violet-950/20 p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold uppercase text-violet-300">AI Speech Score:</span>
+                  <span className="font-heading text-lg font-black text-emerald-400">
+                    {speechAiResult.score} / 100 ({speechAiResult.paceRating})
+                  </span>
+                </div>
+                <ul className="space-y-1 text-xs text-slate-300">
+                  {speechAiResult.feedback.map((f, i) => (
+                    <li key={i} className="flex items-center gap-1.5">
+                      <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
+                      <span>{f}</span>
+                    </li>
+                  ))}
+                </ul>
+                <div className="rounded-lg bg-slate-950 p-3 border border-slate-800 text-[11px] text-slate-300">
+                  <strong className="text-amber-300 block mb-1">Refined Delivery Pitch:</strong>
+                  "{speechAiResult.refinedVersion}"
+                </div>
+              </div>
+            )}
 
             <div className="text-[11px] text-slate-400 bg-slate-950 p-3 rounded-xl border border-slate-800">
               <strong>Fluency Rule:</strong> Replace "um" with a silent 1.5-second pause. Recruiters perceive pauses as thoughtful confidence, while fillers sound uncertain.
@@ -1119,6 +1416,87 @@ export const PracticeStudio: React.FC = () => {
             <div className="rounded-xl border border-slate-800 bg-slate-950 p-3 text-[11px] text-slate-400 leading-relaxed">
               <strong>ATS Screening Rule:</strong> Recruiters filter candidates by keywords and metrics. Every bullet on your resume should prove direct business or technical impact.
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* AI Code Review & Best Practices Modal */}
+      {showAiModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
+          <div className="w-full max-w-2xl rounded-2xl border border-slate-700 bg-slate-900 p-6 sm:p-8 space-y-5 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <div className="flex items-center gap-2">
+                <Bot className="h-5 w-5 text-violet-400" />
+                <h3 className="font-heading text-lg font-bold text-white">
+                  AI Code Tutor & Architecture Review
+                </h3>
+              </div>
+              <button 
+                onClick={() => setShowAiModal(false)}
+                className="text-slate-400 hover:text-white"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {isAiReviewing ? (
+              <div className="py-12 flex flex-col items-center justify-center gap-3">
+                <div className="h-8 w-8 animate-spin rounded-full border-4 border-violet-500/20 border-t-violet-500" />
+                <p className="text-xs text-slate-400">Analyzing DOM structure, CSS layout rules, and JS listeners...</p>
+              </div>
+            ) : aiReview ? (
+              <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-1">
+                <div className="rounded-xl bg-slate-950 p-4 border border-slate-800 text-xs text-slate-200 leading-relaxed">
+                  <p className="font-semibold text-violet-300 mb-1">Architecture Summary:</p>
+                  <p>{aiReview.summary}</p>
+                </div>
+
+                <div className="space-y-2">
+                  <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">Strengths:</span>
+                  <ul className="space-y-1.5 text-xs text-slate-300">
+                    {aiReview.strengths.map((str, i) => (
+                      <li key={i} className="flex items-center gap-2">
+                        <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
+                        <span>{str}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="space-y-2">
+                  <span className="text-xs font-bold uppercase tracking-wider text-amber-400">Improvement Suggestions:</span>
+                  <ul className="space-y-1.5 text-xs text-slate-300">
+                    {aiReview.suggestions.map((sug, i) => (
+                      <li key={i} className="flex items-start gap-2">
+                        <AlertCircle className="h-3.5 w-3.5 text-amber-400 shrink-0 mt-0.5" />
+                        <span>{sug}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {aiReview.fixedCodeSnippet && (
+                  <div className="space-y-1.5 pt-2">
+                    <span className="text-xs font-bold uppercase tracking-wider text-cyan-400">Recommended Optimization:</span>
+                    <pre className="rounded-xl bg-black p-3 font-mono text-xs text-emerald-300 overflow-x-auto border border-slate-800">
+                      {aiReview.fixedCodeSnippet}
+                    </pre>
+                  </div>
+                )}
+
+                <div className="flex items-center justify-between pt-3 border-t border-slate-800 text-[11px] text-slate-500">
+                  <span>{aiReview.isLiveAI ? '⚡ Evaluated by Gemini 1.5 Flash' : '💡 Evaluated by Offline Heuristic Engine'}</span>
+                  <button
+                    onClick={() => setShowAiModal(false)}
+                    className="rounded-lg bg-violet-600 px-4 py-1.5 text-xs font-bold text-white hover:bg-violet-500 transition"
+                  >
+                    Got It
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <p className="text-xs text-slate-400">Click "AI Code Review" to run an automated audit.</p>
+            )}
           </div>
         </div>
       )}
