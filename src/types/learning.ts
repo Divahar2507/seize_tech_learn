@@ -248,4 +248,16 @@ export interface UserProgressState {
   earnedBadgeIds: string[];
   certificates: Certificate[];
   notes: Record<string, UserNote>;
+  streakShieldsAvailable?: number;
+  streakShieldActive?: boolean;
+}
+
+export interface LeaderboardUser {
+  rank: number;
+  uid: string;
+  displayName: string;
+  avatarUrl?: string;
+  xpThisWeek: number;
+  streak: number;
+  isCurrentUser?: boolean;
 }

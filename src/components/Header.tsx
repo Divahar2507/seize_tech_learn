@@ -14,7 +14,9 @@ import {
   X,
   Code2,
   Brain,
-  Search
+  Search,
+  Volume2,
+  VolumeX
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useLearning } from '../context/LearningContext';
@@ -28,7 +30,9 @@ export const Header: React.FC = () => {
     setOpenAuthModal,
     setOpenSearchModal,
     isOnline,
-    syncStatus
+    syncStatus,
+    soundMuted,
+    toggleSound
   } = useLearning();
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
@@ -212,6 +216,20 @@ export const Header: React.FC = () => {
             <Sparkles className="h-4 w-4 text-violet-400" />
             <span>{userState.xp} <span className="text-[10px] text-slate-500 hidden sm:inline">XP</span></span>
           </div>
+
+          {/* Audio Mute / Unmute Toggle */}
+          <button
+            onClick={toggleSound}
+            className={`hidden sm:flex items-center justify-center rounded-lg border p-1.5 text-xs transition ${
+              soundMuted 
+                ? 'border-slate-800 bg-slate-900/40 text-slate-500 hover:text-slate-300' 
+                : 'border-violet-500/30 bg-violet-500/10 text-violet-300 hover:bg-violet-500/20'
+            }`}
+            title={soundMuted ? 'Unmute Sound Effects' : 'Mute Sound Effects'}
+            aria-label={soundMuted ? 'Unmute Sound Effects' : 'Mute Sound Effects'}
+          >
+            {soundMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+          </button>
 
           {/* User Sign In / Profile */}
           <button

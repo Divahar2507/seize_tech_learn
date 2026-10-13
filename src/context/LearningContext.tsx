@@ -11,7 +11,8 @@ import {
   Certificate,
   DailyChallenge,
   UserNote,
-  LearningCategory
+  LearningCategory,
+  LeaderboardUser
 } from '../types/learning';
 import { INITIAL_COURSES } from '../data/coursesData';
 import { INITIAL_PROJECTS } from '../data/projectsData';
@@ -25,6 +26,7 @@ import {
   syncSubmissionToCloud,
   deleteUserDataFromCloud
 } from '../services/firebase';
+import { sounds } from '../utils/soundEffects';
 
 const STORAGE_KEY = 'seize_learn_platform_v3';
 
@@ -48,7 +50,9 @@ const INITIAL_USER_STATE: UserProgressState = {
   projectSubmissions: {},
   earnedBadgeIds: ['badge-first-step'],
   certificates: [],
-  notes: {}
+  notes: {},
+  streakShieldsAvailable: 2,
+  streakShieldActive: true
 };
 
 interface LearningContextType {
@@ -104,6 +108,11 @@ interface LearningContextType {
   logoutLocally: () => void;
   exportDataAsJSON: () => void;
   deleteAccountAndData: () => Promise<void>;
+  toggleStreakShield: () => void;
+  soundMuted: boolean;
+  toggleSound: () => boolean;
+  playAudio: (type: 'success' | 'failure' | 'level_up' | 'card_flip') => void;
+  leaderboardUsers: LeaderboardUser[];
 }
 
 const LearningContext = createContext<LearningContextType | undefined>(undefined);
@@ -271,6 +280,7 @@ export const LearningProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   const triggerCelebration = () => {
     try {
+      sounds.playLevelUp();
       confetti({
         particleCount: 70,
         spread: 70,
@@ -311,6 +321,12 @@ export const LearningProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   ) => {
     const percentage = Math.round((score / totalQuestions) * 100);
     const passed = percentage >= 70;
+
+    if (passed) {
+      sounds.playSuccess();
+    } else {
+      sounds.playFailure();
+    }
 
     setUserState(prev => {
       const newBadges = [...prev.earnedBadgeIds];
@@ -550,6 +566,12 @@ export const LearningProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   };
 
   const recordCardReview = (cardId: string, result: 'easy' | 'hard') => {
+    if (result === 'easy') {
+      sounds.playSuccess();
+    } else {
+      sounds.playFailure();
+    }
+
     setUserState(prev => {
       const xpBonus = result === 'easy' ? 10 : 5;
       const newBadges = [...prev.earnedBadgeIds];
@@ -635,6 +657,60 @@ export const LearningProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     setSyncStatus('saved_locally');
   };
 
+  // Gamification: Streak Freeze / Shield Safeguard
+  const toggleStreakShield = () => {
+    setUserState(prev => {
+      const currentActive = prev.streakShieldActive ?? true;
+      const available = prev.streakShieldsAvailable ?? 2;
+      if (!currentActive && available <= 0) return prev;
+      return {
+        ...prev,
+        streakShieldActive: !currentActive
+      };
+    });
+    sounds.playSuccess();
+  };
+
+  // Audio settings
+  const [soundMuted, setSoundMuted] = useState<boolean>(() => sounds.getMuted());
+  const toggleSound = () => {
+    const next = sounds.toggleMute();
+    setSoundMuted(next);
+    return next;
+  };
+  const playAudio = (type: 'success' | 'failure' | 'level_up' | 'card_flip') => {
+    if (type === 'success') sounds.playSuccess();
+    else if (type === 'failure') sounds.playFailure();
+    else if (type === 'level_up') sounds.playLevelUp();
+    else if (type === 'card_flip') sounds.playCardFlip();
+  };
+
+  // Weekly Community Leaderboard with current learner placed in real-time
+  const leaderboardUsers = useMemo<LeaderboardUser[]>(() => {
+    const baseList: LeaderboardUser[] = [
+      { rank: 1, uid: 'lead-1', displayName: 'Aarav Sharma', avatarUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=120&q=80', xpThisWeek: 880, streak: 14 },
+      { rank: 2, uid: 'lead-2', displayName: 'Sophia Chen', avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=120&q=80', xpThisWeek: 740, streak: 9 },
+      { rank: 3, uid: 'lead-3', displayName: 'Marcus Vance', avatarUrl: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=120&q=80', xpThisWeek: 620, streak: 7 },
+      { rank: 4, uid: 'lead-4', displayName: 'Priya Patel', avatarUrl: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=120&q=80', xpThisWeek: 510, streak: 5 },
+      { rank: 5, uid: 'lead-5', displayName: 'Liam O\'Connor', avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&q=80', xpThisWeek: 390, streak: 4 },
+    ];
+
+    const currentUserName = userState.user.displayName || 'Learner';
+    const currentUserXp = userState.xp;
+    const currentUser: LeaderboardUser = {
+      rank: 0,
+      uid: userState.user.uid,
+      displayName: currentUserName,
+      avatarUrl: userState.user.photoURL,
+      xpThisWeek: currentUserXp,
+      streak: userState.streak,
+      isCurrentUser: true
+    };
+
+    const combined = [...baseList, currentUser].sort((a, b) => b.xpThisWeek - a.xpThisWeek);
+    return combined.map((entry, idx) => ({ ...entry, rank: idx + 1 }));
+  }, [userState.user.displayName, userState.user.uid, userState.user.photoURL, userState.xp, userState.streak]);
+
   return (
     <LearningContext.Provider
       value={{
@@ -689,7 +765,12 @@ export const LearningProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         loginLocally,
         logoutLocally,
         exportDataAsJSON,
-        deleteAccountAndData
+        deleteAccountAndData,
+        toggleStreakShield,
+        soundMuted,
+        toggleSound,
+        playAudio,
+        leaderboardUsers
       }}
     >
       {children}

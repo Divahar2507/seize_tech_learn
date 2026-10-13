@@ -44,7 +44,9 @@ export const GrowthDashboard: React.FC = () => {
     setOpenDailyChallengeModal,
     exportDataAsJSON,
     deleteAccountAndData,
-    syncStatus
+    syncStatus,
+    toggleStreakShield,
+    leaderboardUsers
   } = useLearning();
 
   const categories: { name: LearningCategory; icon: any; color: string }[] = [
@@ -153,19 +155,53 @@ export const GrowthDashboard: React.FC = () => {
             </p>
           </div>
 
-          <div className="flex items-center gap-4 rounded-2xl border border-slate-800 bg-slate-950/80 p-5">
-            <div className="grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-tr from-violet-600 to-cyan-400 font-heading text-xl font-black text-white shadow-lg shadow-violet-500/30">
-              L{level}
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-4 rounded-2xl border border-slate-800 bg-slate-950/80 p-4 sm:p-5">
+              <div className="grid h-12 w-12 sm:h-14 sm:w-14 place-items-center rounded-2xl bg-gradient-to-tr from-violet-600 to-cyan-400 font-heading text-lg sm:text-xl font-black text-white shadow-lg shadow-violet-500/30">
+                L{level}
+              </div>
+              <div>
+                <div className="text-[11px] font-bold uppercase text-slate-400">
+                  Skill Tier
+                </div>
+                <div className="font-heading text-base sm:text-lg font-black text-white">
+                  {userState.user.displayName || 'Learner'}
+                </div>
+                <div className="text-xs font-semibold text-violet-400">
+                  {userState.xp} Total XP · {xpToNext} XP to Level {level + 1}
+                </div>
+              </div>
             </div>
-            <div>
-              <div className="text-xs font-bold uppercase text-slate-400">
-                Skill Tier
+
+            {/* Duolingo-style Streak Freeze Shield */}
+            <div className={`flex items-center gap-3 rounded-2xl border p-4 transition ${
+              userState.streakShieldActive 
+                ? 'border-cyan-500/30 bg-cyan-950/20 shadow-md shadow-cyan-950/30' 
+                : 'border-slate-800 bg-slate-950/60'
+            }`}>
+              <div className={`grid h-12 w-12 place-items-center rounded-xl ${
+                userState.streakShieldActive ? 'bg-cyan-500/20 text-cyan-400' : 'bg-slate-800 text-slate-400'
+              }`}>
+                <ShieldCheck className="h-6 w-6" />
               </div>
-              <div className="font-heading text-lg font-black text-white">
-                {userState.user.displayName || 'Learner'}
-              </div>
-              <div className="text-xs font-semibold text-violet-400">
-                {userState.xp} Total XP · {xpToNext} XP to Level {level + 1}
+              <div>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-xs font-bold text-white">Streak Shield</span>
+                  <span className={`text-[10px] font-extrabold uppercase px-1.5 py-0.5 rounded ${
+                    userState.streakShieldActive ? 'bg-cyan-500/20 text-cyan-300' : 'bg-slate-800 text-slate-400'
+                  }`}>
+                    {userState.streakShieldActive ? 'Equipped' : 'Off'}
+                  </span>
+                </div>
+                <div className="text-[11px] text-slate-400 mt-0.5">
+                  {userState.streakShieldsAvailable ?? 2} shields available
+                </div>
+                <button
+                  onClick={toggleStreakShield}
+                  className="mt-1 text-[11px] font-semibold text-cyan-400 hover:underline"
+                >
+                  {userState.streakShieldActive ? 'Deactivate' : 'Equip Shield'}
+                </button>
               </div>
             </div>
           </div>
@@ -461,6 +497,116 @@ export const GrowthDashboard: React.FC = () => {
               </div>
             );
           })}
+        </div>
+      </div>
+
+      {/* Weekly Global Learner Leaderboard */}
+      <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-6 sm:p-8 space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="p-1.5 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                <Trophy className="h-4 w-4" />
+              </span>
+              <h3 className="font-heading text-xl font-bold text-white">
+                Weekly Global Learner Leaderboard
+              </h3>
+            </div>
+            <p className="mt-1 text-xs text-slate-400">
+              Compete with peer builders worldwide. Top weekly leaders earn verified honors and career placement recognition.
+            </p>
+          </div>
+          <div className="inline-flex items-center gap-2 text-xs font-semibold text-slate-400 bg-slate-950/80 px-3 py-1.5 rounded-xl border border-slate-800">
+            <span className="h-2 w-2 rounded-full bg-emerald-400 animate-ping" />
+            <span>Cycle Resets Every Sunday 23:59 UTC</span>
+          </div>
+        </div>
+
+        <div className="overflow-hidden rounded-2xl border border-slate-800/80 bg-slate-950/60">
+          <div className="divide-y divide-slate-800/60">
+            {leaderboardUsers.map((learner) => {
+              const isTop1 = learner.rank === 1;
+              const isTop2 = learner.rank === 2;
+              const isTop3 = learner.rank === 3;
+
+              return (
+                <div
+                  key={learner.uid}
+                  className={`flex items-center justify-between p-4 transition ${
+                    learner.isCurrentUser
+                      ? 'bg-violet-950/30 border-l-4 border-l-violet-500'
+                      : 'hover:bg-slate-900/40'
+                  }`}
+                >
+                  <div className="flex items-center gap-3.5">
+                    {/* Rank Badge */}
+                    <div className="w-8 text-center">
+                      {isTop1 ? (
+                        <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-amber-500/20 text-amber-300 font-bold text-xs border border-amber-500/40">
+                          🥇
+                        </span>
+                      ) : isTop2 ? (
+                        <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-slate-300/20 text-slate-200 font-bold text-xs border border-slate-300/40">
+                          🥈
+                        </span>
+                      ) : isTop3 ? (
+                        <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-amber-700/20 text-amber-600 font-bold text-xs border border-amber-700/40">
+                          🥉
+                        </span>
+                      ) : (
+                        <span className="text-xs font-bold text-slate-500">
+                          #{learner.rank}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Learner Info */}
+                    <div className="flex items-center gap-3">
+                      {learner.avatarUrl ? (
+                        <img
+                          src={learner.avatarUrl}
+                          alt={learner.displayName}
+                          className="h-9 w-9 rounded-full object-cover border border-slate-700"
+                        />
+                      ) : (
+                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-violet-600/20 text-violet-300 font-bold text-xs border border-violet-500/30">
+                          {learner.displayName[0]?.toUpperCase() || 'U'}
+                        </div>
+                      )}
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-heading text-sm font-bold text-white">
+                            {learner.displayName}
+                          </span>
+                          {learner.isCurrentUser && (
+                            <span className="rounded bg-violet-500/20 px-1.5 py-0.5 text-[10px] font-extrabold uppercase text-violet-300 border border-violet-500/30">
+                              You
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2 text-xs text-slate-400">
+                          <span className="inline-flex items-center gap-1 text-amber-400 font-semibold">
+                            <Flame className="h-3 w-3 fill-current" />
+                            {learner.streak}d streak
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* XP */}
+                  <div className="text-right">
+                    <div className="font-heading text-sm font-extrabold text-violet-300">
+                      {learner.xpThisWeek} XP
+                    </div>
+                    <div className="text-[11px] text-slate-500">
+                      Tier Points
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
 
