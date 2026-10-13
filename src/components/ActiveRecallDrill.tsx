@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { useLearning } from '../context/LearningContext';
 import { LearningCategory, BilingualText } from '../types/learning';
+import { sounds } from '../utils/soundEffects';
 
 interface EnrichedCard {
   id: string;
@@ -48,34 +49,43 @@ export const ActiveRecallDrill: React.FC = () => {
   const [blitzCompleted, setBlitzCompleted] = useState<boolean>(false);
   const timerRef = useRef<any>(null);
 
-  // Compile all flashcards across courses
+  // Compile all flashcards across courses with safe optional chaining
   const allCards = useMemo<EnrichedCard[]>(() => {
     const list: EnrichedCard[] = [];
     allCourses.forEach(course => {
-      course.modules.forEach(module => {
-        module.lessons.forEach(lesson => {
-          lesson.flashcards.forEach(card => {
-            list.push({
-              id: card.id,
-              front: card.front,
-              back: card.back,
-              courseId: course.id,
-              courseTitle: course.title,
-              lessonId: lesson.id,
-              lessonTitle: lesson.title,
-              category: course.category
+      course?.modules?.forEach(module => {
+        module?.lessons?.forEach(lesson => {
+          if (lesson?.flashcards && Array.isArray(lesson.flashcards)) {
+            lesson.flashcards.forEach(card => {
+              list.push({
+                id: card.id,
+                front: card.front,
+                back: card.back,
+                courseId: course.id,
+                courseTitle: course.title,
+                lessonId: lesson.id,
+                lessonTitle: lesson.title,
+                category: course.category
+              });
             });
-          });
+          }
         });
       });
     });
     return list;
   }, [allCourses]);
 
-  // Filtered Cards
+  // Filtered Cards with alias matching
   const filteredCards = useMemo(() => {
     if (selectedCategory === 'all') return allCards;
-    return allCards.filter(c => c.category === selectedCategory);
+    return allCards.filter(c => {
+      if (c.category === selectedCategory) return true;
+      if (selectedCategory === 'ai-tools' && c.category === 'AI Tools & Prompting') return true;
+      if (selectedCategory === 'web-dev' && c.category === 'Web Development') return true;
+      if (selectedCategory === 'english-communication' && c.category === 'English & Communication') return true;
+      if (selectedCategory === 'career-placement' && c.category === 'Career & Placement Prep') return true;
+      return false;
+    });
   }, [allCards, selectedCategory]);
 
   const currentCard = filteredCards[currentIndex] || filteredCards[0];
@@ -398,7 +408,10 @@ export const ActiveRecallDrill: React.FC = () => {
 
           {/* Flashcard Box */}
           <div
-            onClick={() => setIsFlipped(!isFlipped)}
+            onClick={() => {
+              sounds.playCardFlip();
+              setIsFlipped(!isFlipped);
+            }}
             className={`min-h-[300px] sm:min-h-[340px] rounded-2xl p-6 sm:p-8 flex flex-col justify-between cursor-pointer border transition-all duration-300 shadow-xl relative overflow-hidden select-none ${
               isFlipped
                 ? 'bg-gradient-to-br from-slate-900 via-violet-950/40 to-slate-900 border-violet-500/60 shadow-violet-950/30'
